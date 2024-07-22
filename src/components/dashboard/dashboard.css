@@ -1,0 +1,118 @@
+.dashboard {
+    position: relative;
+    /* width: calc(100% - 280px); */
+    padding: 36px 24px;
+    transition: .3s ease;
+    /* width: 100%; */
+    /* left: 280px; */
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
+}
+
+.dashboard .head-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    grid-gap: 16px;
+    flex-wrap: wrap;
+    padding: 20px 10px;
+}
+
+.dashboard .head-title .left h1 {
+    font-size: 36px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--dark);
+}
+
+.dashboard .head-title .left .breadcrumb {
+    display: flex;
+    align-items: center;
+    /* grid-gap: 10px; */
+}
+
+.dashboard .head-title .left .breadcrumb li {
+    color: var(--dark);
+}
+
+.dashboard .head-title .left .breadcrumb li a {
+    color: var(--dark-grey);
+    pointer-events: none;
+}
+
+.dashboard .head-title .left .breadcrumb li a.active {
+    color: var(--blue);
+    pointer-events: unset;
+}
+
+.dashboard .box-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-gap: 24px;
+    margin-top: 30px;
+}
+
+.dashboard .box-info li {
+    padding: 24px;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    grid-gap: 24px;
+    border-radius: 10px;
+    box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+    --webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+}
+
+.dashboard .box-info li .bx {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    font-size: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dashboard .box-info li:nth-child(1) .bx {
+    color: var(--blue);
+}
+
+.dashboard .box-info li:nth-child(2) .bx {
+    color: var(--yellow);
+}
+
+.dashboard .box-info li:nth-child(3) .bx {
+    color: var(--orange);
+}
+
+.dashboard .box-info li .text h3 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.dashboard .box-info li .text p {
+    font-size: 15px;
+    font-weight: 400;
+}
+
+
+.head-session1 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.head-subsession1 {
+    margin-top: 20px;
+    margin-left: 6px;
+    border-radius: 10px;
+    box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+    --webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+    padding: 14px;
+    background: var(--light);
+    display: flex;
+    align-items: center;
+    min-height: 250px;
+    min-width: 49%;
+}

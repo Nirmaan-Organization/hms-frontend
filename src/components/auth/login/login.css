@@ -1,0 +1,378 @@
+.modal.fade .modal-dialog {
+    transition: transform .3s ease-out;
+    transform: translateY(-50px);
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.login-modal {
+    box-shadow: 0 6px 15px rgba(64, 79, 104, .05);
+    border-radius: 8px;
+}
+
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - var(--bs-modal-margin)*2);
+}
+
+.modal-dialog {
+    position: relative;
+    width: auto;
+    margin: var(--bs-modal-margin);
+    pointer-events: none;
+}
+.app-logo{
+    width: 300px;
+    height: 100px;
+}
+
+
+
+.modal-dialog-scrollable .modal-content {
+    max-height: 100%;
+    overflow: hidden;
+}
+
+.modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* margin-top: 30px; */
+    min-width: 400px;
+    color: var(--bs-modal-color);
+    pointer-events: auto;
+    background-color: var(--bs-modal-bg);
+    background-clip: padding-box;
+    border: var(--bs-modal-border-width) solid var(--bs-modal-border-color);
+    border-radius: var(--bs-modal-border-radius);
+    outline: 0;
+}
+
+.closed-modal:before {
+    font-family: 'Flaticon';
+    position: relative;
+    font-size: 12px;
+    color: #000;
+    font-weight: 700;
+}
+
+.closed-modal,
+.closed-modal:before {
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .3s;
+}
+
+.closed-modal:hover {
+    cursor: pointer;
+}
+
+.closed-modal {
+    position: absolute;
+    height: 40px;
+    right: 10px;
+    top: 10px;
+
+    border-radius: 8px;
+    color: #000000;
+    text-indent: 0;
+    font-size: 0;
+    z-index: 5;
+}
+
+.login-modal .modal-body {
+    padding: 0;
+}
+
+/* 
+.modal-dialog-scrollable .modal-body {
+    overflow-y: auto;
+} */
+
+.modal-body {
+    position: relative;
+    flex: 1 1 auto;
+    padding: var(--bs-modal-padding);
+}
+
+#login-modal {
+    padding: 30px 40px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+
+.login-form .h3,
+.login-form h3 {
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 33px;
+    color: #202124;
+    margin-bottom: 32px;
+    text-align: center;
+}
+/* 
+.form-df {
+    display: flex;
+} */
+
+.default-form .form-group1 {
+    position: relative;
+    margin-bottom: 20px;
+    margin-right: 5px;
+}
+
+.default-form .form-group1>label {
+    font-size: 15px;
+    line-height: 20px;
+    color: #202124;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+
+
+.default-form .form-group1 input[type=email],
+.default-form .form-group1 input[type=number],
+.default-form .form-group1 input[type=password],
+.default-form .form-group1 input[type=text],
+.default-form .form-group1 input[type=url] {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    line-height: 30px;
+    padding: 15px 20px;
+    font-size: 15px;
+    color: dimgray;
+    background-color: #f0f5f7;
+    border: 1px solid #f0f5f7;
+    box-sizing: border-box;
+    border-radius: 8px;
+    transition: all .3s ease;
+}
+/* 
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+} */
+
+.login-form .field-outer {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
+.checkboxes {
+    list-style: none;
+    padding: 0;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.input-group:not(.has-validation)>:not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.form-floating) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.checkboxes input[type=checkbox],
+.checkboxes input[type=radio] {
+    display: none;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.input-group>:not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.login-form .field-outer label {
+    margin-bottom: 0;
+}
+
+.checkboxes label {
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    padding-left: 28px;
+    font-size: 15px;
+    line-height: 20px;
+    color: dimgray;
+}
+
+.checkboxes.square label:before {
+    border-radius: 2px;
+}
+
+.checkboxes label:before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    background-color: #fff;
+    border: 1px solid #ecedf2;
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: all .25s;
+    font-family: 'Font Awesome\ 5 Free';
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 17px;
+}
+
+.checkboxes label span {
+    color: #909090;
+}
+
+.login-form .field-outer .pwd {
+    position: relative;
+    /* display: block; */
+    font-size: 14px;
+    line-height: 19px;
+    color: #202124;
+    white-space: nowrap;
+}
+
+.login-form .form-group .theme-btn {
+    /* display: block; */
+    /* width: 20%; */
+    padding: 0 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--blue);
+    font-size: 12px;
+    background: var(--blue);
+    color: var(--light);
+    height: 30px;
+    font-weight: 400;
+    box-shadow: 0 6px 15px rgba(64, 79, 104, .05);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* 
+.btn-style-one {
+    position: relative;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff;
+    background-color: #1967d2;
+    font-size: 15px;
+    line-height: 20px;
+    border-radius: 8px;
+    font-weight: 400;
+    padding: 18px 35px 15px;
+} */
+
+.login-form .text {
+    position: relative;
+    font-size: 14px;
+    line-height: 19px;
+    color: dimgray;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.text,
+p {
+    font-weight: 400;
+    margin: 0;
+}
+
+.login-form .text a {
+    color: dimgray;
+    font-weight: 500;
+}
+
+.default-form .form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.register-dual ul li.react-tabs__tab--selected .btn-style-four {
+    background: #34a853;
+    color: #fff;
+
+}
+
+.btn-style-four {
+    position: relative;
+    text-align: center;
+    white-space: nowrap;
+    color: #1967d2;
+    background-color: #e2eaf8;
+    font-size: 16px;
+    line-height: 20px;
+    border-radius: 8px;
+    font-weight: 400;
+    padding: 10px 25px;
+}
+
+.btn-style-four:hover {
+    color: #e2eaf8;
+    background-color: #1967d2;
+}
+
+
+@media (min-width: 576px) {
+    .modal {
+        --bs-modal-margin: 1.5rem;
+        --bs-modal-box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
+    }
+
+    .modal-dialog {
+        max-width: var(--bs-modal-width);
+        margin-right: auto;
+        margin-left: auto;
+    }
+}
+
+@media (min-width: 992px) {
+
+    .modal-lg,
+    .modal-xl {
+        --bs-modal-width: 450px;
+    }
+
+    .col-lg-6 {
+        flex: 0;
+        width: 50%;
+    }
+}
