@@ -5,13 +5,12 @@ import { NotificationContainer, NotificationManager } from 'react-notifications'
 import 'react-notifications/lib/notifications.css';
 import { CancelOutlined } from '@mui/icons-material';
 // import { useLocation } from 'react-router-dom'
+import { getApiUrl } from '../../../config';
 
 
 const ForgetPassword = ({ ispassChangeOpen, onpasschangeClose }) => {
 
-
-    // const apiUrl = process.env.REACT_APP_API_URL;
-    const apiUrl = 'http://192.168.0.137:8080';
+    const apiUrl = getApiUrl();
 
 
     const [emailID, setEmailID] = useState('');

@@ -4,12 +4,12 @@ import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import Appbar from '../common/header/Appbar';
 import { GroupAddOutlined, MedicalServicesOutlined, PeopleOutlineOutlined, PersonOutlineOutlined, VolunteerActivismOutlined } from '@mui/icons-material';
 import { useState } from 'react';
-
+import { getApiUrl } from '../../config';
 import './dashboard.css'
 
 const Dashboard = () => {
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
 
     const [patientCount, setpatientCount] = useState('')
     const [campCount, setcampCount] = useState('')

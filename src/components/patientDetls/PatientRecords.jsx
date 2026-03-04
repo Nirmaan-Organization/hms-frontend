@@ -16,13 +16,14 @@ import './patientDet.css';
 import EditPatientDet from './PatientForm/EditPatientDet';
 import { useSelector } from 'react-redux';
 import UploadJobDet from '../campdetails/UploadFileDiv/UploadJobDet';
+import { getApiUrl } from '../../config';
 
 function PatientRecords() {
 
     const value = useSelector(state => state.myReducer.value)
     const campIdD = useSelector(state => state.myReducer.campId)
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
     const userId = userProfile ? userProfile.id : null;

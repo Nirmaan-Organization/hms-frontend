@@ -17,6 +17,7 @@ import { setCamp, setValue, setactiveStyle } from '../redux/reducer';
 import './campdet.css';
 import EditCampDet from './campForm/EditCampDet';
 import UploadJobDet from './UploadFileDiv/UploadJobDet';
+import { getApiUrl } from '../../config';
 
 function CampDatadet() {
 
@@ -35,9 +36,7 @@ function CampDatadet() {
   }
 
 
-
-
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = getApiUrl();
   const currentUser = localStorage.getItem('userData')
   const userProfile = JSON.parse(currentUser)
   const userId = userProfile ? userProfile.id : null;

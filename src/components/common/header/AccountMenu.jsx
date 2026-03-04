@@ -25,16 +25,22 @@ function AccountMenu() {
     setAnchorEl(null);
   };
 
-  const currentUser = localStorage.getItem('userData')
-  const userProfile = JSON.parse(currentUser)
-  const name = userProfile ? userProfile.fullName : null;
+  const storedUser = localStorage.getItem('userData');
+  let name = '';
+
+  try {
+    const userProfile = storedUser ? JSON.parse(storedUser) : null;
+    name = userProfile?.fullName || '';
+  } catch (e) {
+    name = '';
+  }
 
 
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
         <div className="header-name">
-          <p>Hi, {name.slice(name.lastIndexOf(' ') + 1)}</p>
+          <p>Hi, {name ? name.slice(name.lastIndexOf(' ') + 1) : ''}</p>
         </div>
         <Tooltip title="Account settings">
           <IconButton style={{ marginLeft: '2px' }}

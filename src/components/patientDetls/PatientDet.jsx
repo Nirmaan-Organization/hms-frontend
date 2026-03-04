@@ -5,10 +5,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ArrowBackIosNewOutlined, BackHandOutlined, BackpackOutlined } from '@mui/icons-material';
 import { setactiveStyle, setValue } from '../redux/reducer';
 import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
+import { getApiUrl } from '../../config';
 
 const PatientDet = () => {
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
 
     const campIdD = useSelector(state => state.myReducer.campId)
 

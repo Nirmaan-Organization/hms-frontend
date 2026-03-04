@@ -4,13 +4,14 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import './editVolunteer.css'
 import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { getApiUrl } from '../../../config';
 
 
 const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, onClose }) => {
 
     // const apiUrl = process.env.NODE_BACKEND_API_URL;
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
 
     const [preferredRoleList, setPreferredRoles] = useState([])
 

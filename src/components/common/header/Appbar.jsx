@@ -15,6 +15,8 @@ import headerLogo from '../../../images/hms-logo.png'
 import PatientDet from '../../patientDetls/PatientDet';
 import AllPatientRecords from '../../patientDetls/AllPatientRecords';
 import AllVolunteerRecords from '../../volunteerDet/AllVolunteerRecords';
+import HealthFormPage from '../../healthForm/page';
+import HCCRecords from '../../healthForm/HCCRecords';
 
 const Appbar = () => {
 
@@ -71,6 +73,8 @@ const Appbar = () => {
                 {sideMenu === 5 && <VolunteerDet />}
                 {sideMenu === 6 && <AllVolunteerRecords />}
                 {sideMenu === 8 && <Settings />}
+                {sideMenu === 9 && <HealthFormPage />}
+                {sideMenu === 10 && <HCCRecords />}
             </div>
         </>
     )

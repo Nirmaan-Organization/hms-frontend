@@ -15,13 +15,14 @@ import 'react-notifications/lib/notifications.css';
 import './patientDet.css';
 import EditPatientDet from './PatientForm/EditPatientDet';
 import { useSelector } from 'react-redux';
+import { getApiUrl } from '../../config';
 
 function AllPatientRecords() {
 
     const value = useSelector(state => state.myReducer.value)
     const campIdD = useSelector(state => state.myReducer.campId)
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
     const userId = userProfile ? userProfile.id : null;
@@ -231,7 +232,7 @@ function AllPatientRecords() {
                                                                 {row.patientID}
                                                             </TableCell>
                                                             <TableCell component="td" scope="row">
-                                                                {row.campPlanningDet.campName}
+                                                                {row.campPlanningDet ? row.campPlanningDet.campName : ''}
                                                             </TableCell>
                                                             <TableCell component="td" scope="row">
                                                                 {row.patientFullName}

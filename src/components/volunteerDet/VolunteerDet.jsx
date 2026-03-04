@@ -4,10 +4,11 @@ import VolunteerRecords from './VolunteerRecords'
 import { useDispatch, useSelector } from 'react-redux';
 import { setactiveStyle, setValue } from '../redux/reducer';
 import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
+import { getApiUrl } from '../../config';
 
 const VolunteerDet = () => {
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
 
     const campIdD = useSelector(state => state.myReducer.campId)
 

@@ -18,6 +18,8 @@ const Sidebar = ({ hideStyle }) => {
     { id: 2, menuItem: 'Camp Management', iconImg: <HolidayVillageOutlinedIcon className='bx' />, menuLink: '/' },
     { id: 4, menuItem: 'All Patient Details', iconImg: <LocalHospitalTwoTone className='bx' />, menuLink: '/' },
     { id: 6, menuItem: 'All Volunteer Details', iconImg: <GroupAddTwoTone className='bx' />, menuLink: '/' },
+    { id: 9, menuItem: 'HCC Data Entry', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '/' },
+    { id: 10, menuItem: 'HCC Records', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '/' },
     // { id: 7, menuItem: 'Inventory Management', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '/' }
   ]
 

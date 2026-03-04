@@ -18,11 +18,11 @@ import 'react-notifications/lib/notifications.css';
 import SwapVertOutlinedIcon from '@mui/icons-material/SwapVertOutlined';
 import EditVolunteerDet from './volunteerForm/EditVolunteerDet';
 import { useSelector } from 'react-redux';
+import { getApiUrl } from '../../config';
 
 function AllVolunteerRecords() {
 
-    const apiUrl = process.env.REACT_APP_API_URL;
-    // const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
 
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
@@ -68,11 +68,15 @@ function AllVolunteerRecords() {
     const [searchText, setsearchText] = useState('')
     const [selectType, setselectType] = useState('')
     const searchVolntrlists = allVolunteers.filter(item =>
-        searchText ? item.volunteerName !== null && item.volunteerName.toLowerCase().includes(searchText.toLowerCase()) : true
+        searchText
+            ? (item.volunteerName || '').toLowerCase().includes(searchText.toLowerCase())
+            : true
     )
 
     const volunteerLists = searchVolntrlists.filter(item =>
-        selectType ? item.preferredRole !== null && item.preferredRole.toLowerCase().includes(selectType.toLowerCase()) : true
+        selectType
+            ? (item.preferredRole || '').toLowerCase().includes(selectType.toLowerCase())
+            : true
     )
 
     const clearSearch = () => {

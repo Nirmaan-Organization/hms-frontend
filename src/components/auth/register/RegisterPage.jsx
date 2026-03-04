@@ -14,7 +14,8 @@ import { useState } from 'react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import VerifyMail from './VerifyMail';
-import headerLogo from '../../../images/hms-logo.png'
+import headerLogo from '../../../images/hms-logo.png';
+import { getApiUrl } from '../../../config';
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -24,9 +25,7 @@ const defaultTheme = createTheme();
 
 function RegisterPage() {
 
-    // const apiUrl = process.env.NODE_BACKEND_API_URL;
-
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
 
     const [fullname, setFullname] = useState('')
     const [email, setEmail] = useState('')
@@ -99,7 +98,7 @@ function RegisterPage() {
                 NotificationManager.error(data.message)
             }
         } catch (error) {
-            NotificationManager.error(error)
+            NotificationManager.error(error?.message || 'Something went wrong. Please try again.')
         }
     };
 

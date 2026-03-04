@@ -16,7 +16,8 @@ import ForgetPassword from '../forgetPassword/ForgetPassword';
 import { useState } from 'react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-import headerLogo from '../../../images/hms-logo.png'
+import headerLogo from '../../../images/hms-logo.png';
+import { getApiUrl } from '../../../config';
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -24,7 +25,7 @@ import headerLogo from '../../../images/hms-logo.png'
 const defaultTheme = createTheme();
 function LoginPage() {
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+    const apiUrl = getApiUrl();
 
     const [isForgetModalOpen, setIsForgetModalOpen] = useState(false);
 
