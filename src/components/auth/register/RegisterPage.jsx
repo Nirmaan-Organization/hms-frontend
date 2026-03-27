@@ -30,7 +30,7 @@ function RegisterPage() {
     const [fullname, setFullname] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [role, setRole] = useState('2')
+    const [role] = useState('1')
     const [userID, setUserID] = useState('')
     const [otpNumber, setOtpNumber] = useState('')
 
@@ -69,7 +69,7 @@ function RegisterPage() {
             "fullName": fullname,
             "email": email,
             "password": password,
-            "roleId": role
+            "roleId": Number(role)
         }
 
         try {
