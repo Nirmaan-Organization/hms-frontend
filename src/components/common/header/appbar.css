@@ -4,12 +4,20 @@
     position: fixed;
     left: 250px;
     transition: .3s ease;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #hide~.container-main {
     position: relative;
     width: calc(100% - 60px);
     left: 60px;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .content nav {

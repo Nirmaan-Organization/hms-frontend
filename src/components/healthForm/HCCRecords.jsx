@@ -20,6 +20,35 @@ import {
 } from '@mui/material';
 import { getApiUrl } from '../../config';
 
+function toCsvValue(value) {
+  if (value === null || value === undefined) return '';
+  const str = String(value);
+  // Escape double-quotes by doubling them; wrap in quotes if needed
+  if (/[",\r\n]/.test(str)) return `"${str.replaceAll('"', '""')}"`;
+  return str;
+}
+
+function buildCsv(columns, rows) {
+  const header = columns.map((c) => toCsvValue(c.header)).join(',');
+  const lines = rows.map((row) =>
+    columns.map((c) => toCsvValue(c.getValue(row))).join(',')
+  );
+  // Add UTF-8 BOM so Excel opens Unicode CSV correctly
+  return `\uFEFF${[header, ...lines].join('\r\n')}`;
+}
+
+function downloadTextFile({ filename, content, mimeType }) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 const HCCRecords = () => {
   const apiUrl = getApiUrl();
 
@@ -100,6 +129,28 @@ const HCCRecords = () => {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
+
+  const exportFilteredRecordsCsv = () => {
+    const columns = [
+      { header: 'School Name', getValue: (r) => r.schoolName },
+      { header: 'Student Name', getValue: (r) => r.studentName },
+      { header: 'Student ID', getValue: (r) => r.studentId },
+      { header: 'Class', getValue: (r) => r.studentClass },
+      { header: 'School Type', getValue: (r) => r.schoolType },
+      { header: 'District', getValue: (r) => r.district },
+      { header: 'Illness Type', getValue: (r) => r.illnessType },
+      { header: 'Illness Details', getValue: (r) => r.illness },
+      { header: 'Date of Record', getValue: (r) => r.healthDate },
+    ];
+
+    const csv = buildCsv(columns, filteredRecords);
+    const today = new Date().toISOString().slice(0, 10);
+    downloadTextFile({
+      filename: `hcc-records-${today}.csv`,
+      content: csv,
+      mimeType: 'text/csv;charset=utf-8',
+    });
+  };
 
   const fetchVitalsForRecord = async (recordId) => {
     setLoadingVitals(true);
@@ -276,6 +327,14 @@ const HCCRecords = () => {
           }}
         >
           Clear
+        </Button>
+        <Button
+          size="small"
+          variant="contained"
+          onClick={exportFilteredRecordsCsv}
+          disabled={filteredRecords.length === 0}
+        >
+          Export CSV
         </Button>
       </Box>
       <Paper>

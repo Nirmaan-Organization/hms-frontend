@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import './appbar.css'
-import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import avatar from '../../../images/userprofile.png'
 import Sidebar from '../sidebar/Sidebar';
 import Dashboard from '../../dashboard/Dashboard';
-import { useLocation } from 'react-router-dom/cjs/react-router-dom';
 import CampDet from '../../campdetails/CampDet';
 import { useSelector } from 'react-redux';
 import VolunteerDet from '../../volunteerDet/VolunteerDet';
 import Settings from '../../settings/Settings';
 import AccountMenu from './AccountMenu';
-import headerLogo from '../../../images/hms-logo.png'
 import PatientDet from '../../patientDetls/PatientDet';
 import AllPatientRecords from '../../patientDetls/AllPatientRecords';
 import AllVolunteerRecords from '../../volunteerDet/AllVolunteerRecords';
 import HealthFormPage from '../../healthForm/page';
 import HCCRecords from '../../healthForm/HCCRecords';
+import Statistics from '../../healthForm/Statistics';
+import { isHccAdmin, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
 
 const Appbar = () => {
 
@@ -27,13 +25,10 @@ const Appbar = () => {
     }
 
     const value = useSelector(state => state.myReducer.value)
-    const actStyle = useSelector(state => state.myReducer.activeStyle)
-    const sideMenu = value == '' ? 1 : value;
+    const sideMenu = value === '' ? 1 : value;
 
-
-    const currentUser = localStorage.getItem('userData')
-    const userProfile = JSON.parse(currentUser)
-    const name = userProfile ? userProfile.fullName : null;
+    const canSeeHcc = isSuperAdmin() || isHccRole();
+    const canSeeHccStats = isSuperAdmin() || isHccAdmin();
 
     return (
         <>
@@ -73,8 +68,9 @@ const Appbar = () => {
                 {sideMenu === 5 && <VolunteerDet />}
                 {sideMenu === 6 && <AllVolunteerRecords />}
                 {sideMenu === 8 && <Settings />}
-                {sideMenu === 9 && <HealthFormPage />}
-                {sideMenu === 10 && <HCCRecords />}
+                {sideMenu === 9 && (canSeeHcc ? <HealthFormPage /> : <Dashboard />)}
+                {sideMenu === 10 && (canSeeHcc ? <HCCRecords /> : <Dashboard />)}
+                {sideMenu === 11 && (canSeeHccStats ? <Statistics /> : <Dashboard />)}
             </div>
         </>
     )
