@@ -129,11 +129,7 @@ function AllVolunteerRecords() {
         <>
             <div className="container">
                 <div className="head-title">
-<<<<<<< HEAD
                     <div className="left" style={{ display: 'flex', gridGap: '10px' }}>
-=======
-                    <div className="sesstion-header-name">
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
                         <h2>All Volunteer Details</h2>
                     </div>
                 </div>
@@ -173,7 +169,7 @@ function AllVolunteerRecords() {
 
                             </div>
                             <Paper className='table-volunteer-container'>
-                                <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+                                <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
                                     <Table size='small' aria-label="a dense table">
                                         <TableHead>
                                             <TableRow>

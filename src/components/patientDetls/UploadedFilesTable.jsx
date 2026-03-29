@@ -1,270 +1,225 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
-import { DownloadOutlined } from '@mui/icons-material';
-import FileSaver from 'file-saver'
+import React, { useEffect, useState } from "react";
+import {
+  Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Paper, IconButton, Tooltip
+} from "@mui/material";
+import {
+  DownloadOutlined,
+  DeleteOutlineOutlined,
+  AddCircleOutlineOutlined
+} from "@mui/icons-material";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import FileOpenOutlinedIcon from "@mui/icons-material/FileOpenOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import FileSaver from "file-saver";
+import { NotificationContainer, NotificationManager } from "react-notifications"; 
+import ExtractBloodReport from "./ExtractBloodReport";
+import "./patientDet.css"; 
+import AddPatientReport from "./patientReports/AddPatientReport";
 
-const UploadedFilesTable = ({ uploadedFiles, data }) => {
+const UploadedFilesTable = ({
+  data,
+  handleBack,
+  selectedPatientName,
+  selectedData
+}) => {
+  const apiUrl = process.env.REACT_APP_API_URL;
 
-    const apiUrl = process.env.REACT_APP_API_URL;
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isAddAttachmentOpen, setIsAddAttachmentOpen] = useState(false);
+  const [isViewReportOpen, setIsViewReportOpen] = useState(false);
 
-    if (!uploadedFiles || uploadedFiles.length === 0) {
-        return <p>No files uploaded yet.</p>;
+  // 📅 Format Date
+  const formatDateTime = (date) => {
+    if (!date) return "";
+    return new Date(date).toLocaleString();
+  };
+
+  // 📡 Fetch Files
+  const fetchUploadedFiles = async () => {
+    try {
+      if (!data) return;
+
+      const res = await fetch(`${apiUrl}/getPatientReports/${data}`);
+      if (!res.ok) throw new Error("Failed to fetch");
+
+      const json = await res.json();
+      setUploadedFiles(json || []);
+    } catch (err) {
+      console.error(err);
     }
-    const handleDownload = async (file) => {
-        try {
-            let payload = {
-                "patientID": data.patientID,
-                "fileName": file
-            }
-            const res = await fetch(`${apiUrl}/downloadreport`, {
-=======
-import { AddCircleOutlineOutlined, DeleteOutlineOutlined, DownloadOutlined } from '@mui/icons-material';
-import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip } from '@mui/material';
-import FileSaver from 'file-saver';
-import React, { useEffect, useState } from 'react';
-import { NotificationContainer, NotificationManager } from 'react-notifications';
-import AddPatientReport from './patientReports/AddPatientReport';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import FileOpenOutlinedIcon from '@mui/icons-material/FileOpenOutlined';
-import ExtractBloodReport from './ExtractBloodReport';
+  };
 
-const UploadedFilesTable = ({ data, handleBack, selectedPatientName, selectedData }) => {
+  useEffect(() => {
+    fetchUploadedFiles();
+  }, [data]);
 
-    const formatDateTime = (isoDate) => {
-        const date = new Date(isoDate);
-        const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: true
-        };
-        return date.toLocaleString(undefined, options);
+  // 📥 Download
+  const handleDownload = async (filePath) => {
+    try {
+      const res = await fetch(`${apiUrl}/downloadattachment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filePath })
+      });
+
+      if (!res.ok) throw new Error("Download failed");
+
+      const blob = await res.blob();
+      FileSaver.saveAs(blob, filePath);
+    } catch (err) {
+      console.error(err);
+      NotificationManager.error("Download failed");
     }
-    const apiUrl = process.env.REACT_APP_API_URL;
+  };
 
-    const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [patientData, setPatientData] = useState(null);
-    const [isAddAttachmentOpen, setisAddAttachmentOpen] = useState(false)
-    const [attachmentData, setattachmentData] = useState([]);
-    const getPatientDetail = async () => {
-        try {
-            const response = await fetch(`${apiUrl}/getOnePatientDetls/${data}`);
-            if (response.ok) {
-                const jsonResponse = await response.json();
-                setPatientData(jsonResponse);
-            }
-        } catch (error) {
-            console.error('Error fetching files:', error);
-        }
+  // 🗑 Delete
+  const deleteAttachment = async (id) => {
+    try {
+      const res = await fetch(`${apiUrl}/deleteAttachment/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ created_by: "2" })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        NotificationManager.success(data.message);
+        fetchUploadedFiles();
+      } else {
+        NotificationManager.error(data.message);
+      }
+    } catch (err) {
+      console.error(err);
     }
-    const fetchUploadedFiles = async () => {
-        try {
-            if (data) {
-                const response = await fetch(`${apiUrl}/getPatientReports/${data}`);
-                if (response.ok) {
-                    const jsonResponse = await response.json();
-                    setUploadedFiles(jsonResponse);
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching files:', error);
-        }
-    };
-    useEffect(() => {
-        fetchUploadedFiles()
-        getPatientDetail()
-    }, []);
+  };
 
-    const [isViewReportOpen, setisViewReportOpen] = useState(false)
-    const viewReport = async (file) => {
-        setisViewReportOpen(true)
-    }
+  // 👁 View
+  const viewReport = () => setIsViewReportOpen(true);
+  const closeReport = () => setIsViewReportOpen(false);
 
-    const CloseReport = async (file) => {
-        setisViewReportOpen(false)
-    }
+  return (
+    <>
+      {isViewReportOpen ? (
+        <ExtractBloodReport CloseReport={closeReport} />
+      ) : (
+        <div className="sub-container">
 
-    const deleteAttachmentData = async (fileID) => {
-        try {
-            let payload = {
-                "created_by": '2'
-            }
-            const res = await fetch(`${apiUrl}/deleteAttachment/${fileID}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                const data = await res.json();
-                NotificationManager.success(data.message);
-                fetchUploadedFiles();
-            } else {
-                const data = await res.json();
-                NotificationManager.error(data.message)
-            }
+          {/* 🔝 Header */}
+          <div className="head">
+            <div className="flex items-center gap-2 mb-2">
+              <Tooltip title="Back">
+                <IconButton onClick={handleBack}>
+                  <ArrowCircleLeftIcon />
+                </IconButton>
+              </Tooltip>
 
-        } catch (error) {
-            console.error('Error Deleting report:', error);
+              <h3>
+                Files for Patient: {selectedPatientName}
+              </h3>
+            </div>
 
-        }
-    }
+            <div>
+              <Tooltip title="Refresh">
+                <IconButton onClick={fetchUploadedFiles}>
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
 
-    const handleDownload = async (file) => {
-        try {
-            let payload = {
-                "filePath": file
-            }
-            const res = await fetch(`${apiUrl}/downloadattachment`, {
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                responseType: 'blob',
-                body: JSON.stringify(payload),
-            })
-            console.log('result: ', res);
-            if (res.ok) {
-                const blob = await res.blob();
-                const blobfile = new Blob([blob])
-                FileSaver.saveAs(blobfile, file)
-            }
-        } catch (error) {
-            console.error('Error fetching files:', error);
-        }
-    }
-<<<<<<< HEAD
-    return (
-        <TableContainer component={Paper} style={{ backgroundColor: 'whitesmoke' }}>
-            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-                <TableHead style={{ backgroundColor: 'ActiveBorder'}}>
-                    <TableRow>
-                        <TableCell style={{color:'white'}}>File Name</TableCell>
-                        <TableCell style={{color:'white'}}>Description</TableCell>
-                        <TableCell style={{color:'white'}}>Actions</TableCell>
-                    </TableRow>
+              <Tooltip title="Add Report">
+                <IconButton onClick={() => setIsAddAttachmentOpen(true)}>
+                  <AddCircleOutlineOutlined />
+                </IconButton>
+              </Tooltip>
+            </div>
+          </div>
+
+          {/* 📊 Table */}
+          <Paper className="table-patient-container">
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>File Name</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell>Uploaded</TableCell>
+                    <TableCell align="center">Actions</TableCell>
+                  </TableRow>
                 </TableHead>
+
                 <TableBody>
-                    {uploadedFiles.map((file) => (
-                        <TableRow key={file.id}>
-                            <TableCell>
-                                {file.reportFileName.length > 25
-                                    ? `${file.reportFileName.slice(0, 20)}...`
-                                    : file.reportFileName}
-                            </TableCell>
-                            <TableCell>{file.description}</TableCell>
-                            <TableCell>
-                                <IconButton onClick={() => handleDownload(file.reportFileName)}>
-                                    <DownloadOutlined />
-                                </IconButton>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                  {uploadedFiles.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        No files uploaded
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    uploadedFiles.map((file) => (
+                      <TableRow key={file.id}>
+                        <TableCell>
+                          {file.reportFileName?.length > 25
+                            ? `${file.reportFileName.slice(0, 20)}...`
+                            : file.reportFileName}
+                        </TableCell>
+
+                        <TableCell>{file.reportType}</TableCell>
+                        <TableCell>{file.description}</TableCell>
+                        <TableCell>
+                          {formatDateTime(file.reportUploadDate)}
+                        </TableCell>
+
+                        <TableCell align="center">
+                          <Tooltip title="View">
+                            <IconButton onClick={() => viewReport(file)}>
+                              <FileOpenOutlinedIcon />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title="Download">
+                            <IconButton
+                              onClick={() =>
+                                handleDownload(file.reportFilePath)
+                              }
+                            >
+                              <FileDownloadOutlinedIcon />
+                            </IconButton>
+                          </Tooltip>
+
+                          <Tooltip title="Delete">
+                            <IconButton
+                              onClick={() => deleteAttachment(file.id)}
+                            >
+                              <DeleteOutlineOutlined />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
-            </Table>
-        </TableContainer>
-=======
+              </Table>
+            </TableContainer>
+          </Paper>
 
-    const addAttachmentTab = () => {
-        setisAddAttachmentOpen(true);
-    }
+          {/* ➕ Add Attachment Modal */}
+          {isAddAttachmentOpen && (
+            <AddPatientReport
+              data={selectedData}
+              loadUploadedFiles={fetchUploadedFiles}
+              isOpen={isAddAttachmentOpen}
+              onClose={() => setIsAddAttachmentOpen(false)}
+            />
+          )}
 
-    return (
-        <>
-            {isViewReportOpen ? (<>
-                <ExtractBloodReport CloseReport={CloseReport}/>
-            </>) :
-                <div className="sub-container">
-                    <div className="head">
-                        <div style={{ display: 'flex', gridGap: '10px', alignItems: 'center', marginBottom: '4px' }}
-                            className="flex gap-10 items-center mb-4">
-                            <IconButton className='icon-action'>
-                                <Tooltip title='back'>
-                                    <ArrowCircleLeftIcon onClick={handleBack} className='icon-action' />
-                                </Tooltip>
-                            </IconButton>
-                            <h3 className="text-lg font-semibold">Files for Patient Name: {selectedPatientName}</h3>
-                        </div>
-                        <div className='icon-manage' style={{ display: 'flex', alignItems: 'center' }}>
-                            <IconButton className='bx'>
-                                <Tooltip className='bx' title='Report details refresh'>
-                                    <RefreshIcon className='bx' onClick={fetchUploadedFiles} />
-                                </Tooltip>
-                            </IconButton>
-                            <IconButton className='bx'>
-                                <Tooltip className='bx' title='Add Report'>
-                                    <AddCircleOutlineOutlined className='bx'
-                                        onClick={() => addAttachmentTab(null)}
-                                    />
-                                </Tooltip>
-                            </IconButton>
-                        </div>
-                    </div>
-                    <Paper className='table-patient-container'>
-                        <TableContainer component={Paper} style={{ backgroundColor: 'whitesmoke' }}>
-                            <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-                                <TableHead style={{ backgroundColor: 'ActiveBorder' }}>
-                                    <TableRow>
-                                        <TableCell style={{ color: 'white', width: '250px' }}>File Name</TableCell>
-                                        <TableCell style={{ color: 'white' }}>File Type</TableCell>
-                                        <TableCell style={{ color: 'white', width: '350px' }}>Description</TableCell>
-                                        <TableCell style={{ color: 'white', width: '200px' }}>Date of Upload</TableCell>
-                                        <TableCell style={{ color: 'white', textAlign: 'center' }}>Actions</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {uploadedFiles.map((file) => (
-                                        <TableRow key={file.id}>
-                                            <TableCell>
-                                                {file.reportFileName != null && file.reportFileName.length > 25
-                                                    ? `${file.reportFileName.slice(0, 20)}...`
-                                                    : file.reportFileName}
-                                            </TableCell>
-                                            <TableCell>{file.reportType}</TableCell>
-                                            <TableCell>{file.description}</TableCell>
-                                            <TableCell>{formatDateTime(file.reportUploadDate)}</TableCell>
-                                            <TableCell align="center" className='action-items'>
-                                                <IconButton className='icon-action'
-                                                    onClick={() => viewReport(file)}>
-                                                    <Tooltip title='View Report'>
-                                                        <FileOpenOutlinedIcon className='icon-action' />
-                                                    </Tooltip>
-                                                </IconButton>
-                                                <IconButton className='icon-action'
-                                                    onClick={() => handleDownload(file.reportFilePath)}>
-                                                    <Tooltip title='Download Report'>
-                                                        <FileDownloadOutlinedIcon className='icon-action' />
-                                                    </Tooltip>
-                                                </IconButton>
-                                                <IconButton className='icon-action'
-                                                    onClick={() => deleteAttachmentData(file.id)}>
-                                                    <Tooltip title='Delete'>
-                                                        <DeleteOutlineOutlined className='icon-action' />
-                                                    </Tooltip>
-                                                </IconButton>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
-                    {isAddAttachmentOpen && (
-                        <AddPatientReport data={selectedData} loadUploadedFiles={fetchUploadedFiles} attachmentData={attachmentData} isOpen={isAddAttachmentOpen} onClose={() => setisAddAttachmentOpen(false)} />
-                    )}
-                    <NotificationContainer />
-                </div>
-            }
-        </>
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
-    );
+          <NotificationContainer />
+        </div>
+      )}
+    </>
+  );
 };
 
 export default UploadedFilesTable;

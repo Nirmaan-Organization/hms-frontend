@@ -8,10 +8,7 @@ import LoginPage from "./components/auth/login/LoginPage";
 import LogoutPage from "./components/auth/login/LogoutPage";
 import RegisterPage from "./components/auth/register/RegisterPage";
 import Appbar from './components/common/header/Appbar';
-<<<<<<< HEAD
 import SessionTimeout from "./components/session/SessionTimeout";
-=======
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route

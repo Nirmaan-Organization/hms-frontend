@@ -218,7 +218,7 @@ function CampDatadet() {
 
             </div>
             <Paper className='table-container-camp'>
-              <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
+              <TableContainer component={Paper} sx={{ maxHeight: 300 }}> 
                 <Table size='small' aria-label="a dense table">
                   <TableHead>
                     <TableRow>

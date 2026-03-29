@@ -72,11 +72,7 @@ function VolunteerRecords() {
     const [searchText, setsearchText] = useState('')
     const [selectType, setselectType] = useState('')
 
-<<<<<<< HEAD
     const searchVol = allVolunteers  
-=======
-    const searchVol = allVolunteers
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
         .filter(item =>
             searchText ? item.volunteerName !== null && item.volunteerName.toLowerCase().includes(searchText.toLowerCase()) : true
         )
@@ -179,11 +175,7 @@ function VolunteerRecords() {
                             <Table size='small' aria-label="a dense table">
                                 <TableHead>
                                     <TableRow>
-<<<<<<< HEAD
-                                        <TableCell style={{ display: 'flex', alignItems: 'center' }} >Volunteer ID 
-=======
                                         <TableCell style={{ display: 'flex', alignItems: 'center' }} >Volunteer ID
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
                                             {/* <SwapVertOutlinedIcon style={{fontSize:'15px'}}/>  */}
                                         </TableCell>
                                         <TableCell >Volunteer Name</TableCell>

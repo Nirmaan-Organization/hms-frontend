@@ -2,19 +2,11 @@ import { DashboardCustomizeOutlined, GroupAddTwoTone, Inventory2Outlined, LocalH
 import HolidayVillageOutlinedIcon from '@mui/icons-material/HolidayVillageOutlined';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-<<<<<<< HEAD
 import headerIcon from '../../../images/hms-icon.png';
 import headerLogo from '../../../images/hms-logo.png';
 import { setValue } from '../../redux/reducer';
 import './sidebar.css';
-
-=======
-import headerIcon from '../../../images/genrl-icon.png';
-import headerLogo from '../../../images/genrl-logo.png';
-import { setValue } from '../../redux/reducer';
-import './sidebar.css';
  
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 const Sidebar = ({ hideStyle, userData }) => {
 
   const userRole = userData.role;
@@ -45,10 +37,7 @@ const Sidebar = ({ hideStyle, userData }) => {
     },
   ]
   const dispatch = useDispatch();
-<<<<<<< HEAD
 
-=======
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
   const actStyle = useSelector(state => state.myReducer.activeStyle)
 
   const [activeStyle, setactiveStyle] = useState(actStyle === '' ? 1 : actStyle)

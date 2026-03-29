@@ -4,11 +4,7 @@
 
 .container {
     position: relative;
-<<<<<<< HEAD
     padding: 25px;
-=======
-    padding: 10px 25px;
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     transition: .3s ease;
     max-height: calc(100vh - 56px);
     overflow-y: auto;
@@ -53,17 +49,10 @@
 .container .table-data {
     display: flex;
     flex-wrap: wrap;
-<<<<<<< HEAD
     margin-top: 10px;
     width: 100%;
     height: 500px;
     max-height: 500px;
-=======
-    margin-top: 5px;
-    width: 100%;
-    height: 430px;
-    max-height: 430px;
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
     --webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
     background: var(--light);
@@ -84,11 +73,7 @@
     display: flex;
     align-items: center;
     grid-gap: 16px;
-<<<<<<< HEAD
     margin-bottom: 24px;
-=======
-    margin-bottom: 15px;
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     justify-content: space-between;
 }
 

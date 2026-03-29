@@ -57,18 +57,15 @@
     /* margin-left: 6px; */
     border-radius: 48px 0 0 48px;
     padding: 4px;
-<<<<<<< HEAD
 }
 
 .side-menu li.active {
     background: #b0cfd9;
-=======
     transition: background-color 0.3s ease;
 }
 
 .side-menu li.active {
     background: #a8dbcf;
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     color: #04719c;
     position: relative;
 }
@@ -123,18 +120,11 @@
     transition: width .3s ease;
 }
 
-<<<<<<< HEAD
 
 
 .side-menu li a:hover {
     background: #c1dce2;
     color: #036280;
-
-=======
-.side-menu li a:hover {
-    background: #b8ceca;
-    color: #007a5e;
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 }
 
 .side-menu li a .bx {
@@ -180,8 +170,3 @@
 }
 
 @media screen and (max-width:576px) {}
-
-
-@media screen and (max-width:370px) {
-    
-}

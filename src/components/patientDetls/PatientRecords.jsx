@@ -1,14 +1,4 @@
-<<<<<<< HEAD
 import { AddCircleOutlineOutlined, ModeEditOutlineOutlined, UploadFileOutlined, VisibilityOutlined } from '@mui/icons-material';
-=======
-import {
-    AddCircleOutlineOutlined,
-    ModeEditOutlineOutlined,
-    UploadFileOutlined, VisibilityOutlined
-} from '@mui/icons-material';
-
-import AttachFileIcon from '@mui/icons-material/AttachFile';
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 import { Button, IconButton, TablePagination, Tooltip } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -17,33 +7,18 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-<<<<<<< HEAD
 import { useSelector } from 'react-redux';
 import UploadJobDet from '../campdetails/UploadFileDiv/UploadJobDet';
+import AddVolunteerOption from '../volunteerDet/AddVolunteerOption';
 import './patientDet.css';
 import EditPatientDet from './PatientForm/EditPatientDet';
-import AddVolunteerOption from '../volunteerDet/AddVolunteerOption';
 
 function PatientRecords() {
 
     // const value = useSelector(state => state.myReducer.value)
-=======
-import { useDispatch, useSelector } from 'react-redux';
-import UploadJobDet from '../campdetails/UploadFileDiv/UploadJobDet';
-import AddVolunteerOption from '../volunteerDet/AddVolunteerOption';
-import './patientDet.css';
-import EditPatientDet from './PatientForm/EditPatientDet';
-import UploadedFilesTable from './UploadedFilesTable';
-import { setactiveStyle, setValue } from '../redux/reducer';
-import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
-
-function PatientRecords() {
-
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     const campIdD = useSelector(state => state.myReducer.campId)
 
     const apiUrl = process.env.REACT_APP_API_URL;
@@ -55,11 +30,17 @@ function PatientRecords() {
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-<<<<<<< HEAD
- 
-=======
 
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
+    const [campDetls, setCampDetls] = useState([])
+    useEffect(() => {
+        fetch(`${apiUrl}/getAllCampNames`)
+            .then(response => response.json())
+            .then(data => {
+                setCampDetls(data)
+            }).catch(err => {
+
+            })
+    }, [])
     const [allPatientRecords, setAllPatientRecords] = useState([])
 
     const [selectCamp, setselectCamp] = useState(campIdD === '' ? null : campIdD)
@@ -149,34 +130,24 @@ function PatientRecords() {
         setEditModalOpen(true);
     }
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     const [isModalOpen, setIsModalOpen] = useState(false);
     const openModal = () => {
         setIsModalOpen(true);
     };
-<<<<<<< HEAD
 
     const closeModal = () => {
         setIsModalOpen(false);
     };
 
 
-=======
-    const closeModal = () => {
-        setIsModalOpen(false);
-    };
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     const [isOptionOpen, setisOptionOpen] = useState(false)
     const [isOptionMode, setisOptionMode] = useState('')
     const addOptionOpen = (row) => {
         setisOptionOpen(true)
         setisOptionMode('Patients')
     }
-<<<<<<< HEAD
 
     return (
         <>
@@ -335,226 +306,9 @@ function PatientRecords() {
 
                 <NotificationContainer />
             </section>
-
-
         </>
     );
 }
 
 
-=======
-    const [isViewingAttachments, setIsViewingAttachments] = useState(false);
-    const [selectedPatientDet, setSelectedPatientDet] = useState(null);
-    const [selectedPatientName, setSelectedPatientName] = useState(null);
-
-    const handleView = async (row) => {
-        setIsViewingAttachments(true);
-        setSelectedPatientDet(row.id);
-        setSelectedPatientName(row.patientFullName);
-        setSelectedData(row);
-    };
-    const handleBack = () => {
-        setIsViewingAttachments(false);
-        setSelectedPatientDet(null);
-    };
-    // const campIdD = useSelector(state => state.myReducer.campId)
-
-    const [campDetls, setCampDetls] = useState([])
-    useEffect(() => {
-
-        fetch(`${apiUrl}/getCampNameDet/${campIdD}`)
-            .then(response => response.json())
-            .then(data => {
-                setCampDetls(data.campName)
-            }).catch(err => {
-                setCampDetls('')
-            })
-    }, [])
-
-    const dispatch = useDispatch();
-    const sidebarChange = () => {
-        dispatch(setactiveStyle(2))
-        dispatch(setValue(2))
-    }
-    return (
-        <>
-            <div className= "container">
-                {isViewingAttachments ? (<></>) :
-                    <div className="head-title">
-                        <div className="sesstion-header-name" style={{ display: 'flex', gridGap: '10px', alignItems: 'center' }}>
-                            <ArrowCircleLeftIcon onClick={() => sidebarChange()}
-                                style={{ cursor: 'pointer' }} />
-                            <h2>Patient Details - {campDetls}</h2>
-                        </div>
-                    </div>
-                }
-                <div className="table-data">
-                    <section className='main-container'>
-                        {!isViewingAttachments ? (
-                            <>
-                                <div className="sub-container">
-                                    <div className="head">
-                                        <div className="search-filter">
-                                            <input type="text" placeholder="Search with Patient ID, Full name or Contact No"
-                                                onChange={e => setsearchText(e.target.value)}
-                                                value={searchText}
-                                            />
-                                            <select className="jm-search-select"
-                                                value={searchBlood} onChange={(e) => setBloodName(e.target.value)}>
-                                                <option>Select Group</option>
-                                                {bloodList === undefined ?
-                                                    <option>Select Group</option> :
-                                                    bloodList.map((item) => (
-                                                        <option key={item.id} value={item.bloodGroup}>
-                                                            {item.bloodGroup}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                            <Button style={{ height: '20px', fontSize: '10px', width: '25px' }}
-                                                variant="contained" color="error" onClick={clearSearch}>
-                                                Clear
-                                            </Button>
-                                        </div>
-                                        <div className='icon-manage' style={{ display: 'flex', alignItems: 'center' }}>
-                                            <IconButton className='bx'>
-                                                <Tooltip className='bx' title='Bulk Upload'>
-                                                    <UploadFileOutlined className='bx' onClick={openModal} />
-                                                </Tooltip>
-                                            </IconButton>
-                                            <IconButton className='bx'>
-                                                <Tooltip className='bx' title='Add Patient Details'>
-                                                    <AddCircleOutlineOutlined className='bx'
-                                                        onClick={() => addRecord(null)}
-                                                    // onClick={() => addOptionOpen(null)}
-                                                    />
-                                                </Tooltip>
-                                            </IconButton>
-                                        </div>
-                                    </div>
-                                    <Paper className='table-patient-container'>
-                                        <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
-                                            <Table size='small' aria-label="a dense table">
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell>Patient ID</TableCell>
-                                                        <TableCell >Patient Name</TableCell>
-                                                        <TableCell >Age</TableCell>
-                                                        <TableCell align="left">Gender</TableCell>
-                                                        <TableCell align="left">Blood Group</TableCell>
-                                                        <TableCell align="left">Contact No</TableCell>
-                                                        <TableCell align="left">Email ID</TableCell>
-                                                        <TableCell align="left">Address</TableCell>
-                                                        <TableCell align="left">Marital Status </TableCell>
-                                                        <TableCell align="left">Occupation</TableCell>
-                                                        <TableCell align="left">Primary Lang</TableCell>
-                                                        <TableCell align="left">Existing Medical Cond</TableCell>
-                                                        <TableCell align="left">Current Medications</TableCell>
-                                                        <TableCell align="left">Allergies To Medications</TableCell>
-                                                        <TableCell align="left">Family Medical History</TableCell>
-                                                        <TableCell align="left">Reason For Visiting</TableCell>
-                                                        <TableCell align="left">Emergency Contact Name</TableCell>
-                                                        <TableCell align="left">Emergency Contact No</TableCell>
-                                                        <TableCell align="left" style={{ width: '500px' }}>Emergency Preson Relation</TableCell>
-                                                        <TableCell align="left">About Camp Known</TableCell>
-                                                        <TableCell align="left">Other Info</TableCell>
-                                                        <TableCell align="left">Created By</TableCell>
-                                                        <TableCell>Action</TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {searchVolntrlists
-                                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                                        .map((row, index) => {
-                                                            return (
-                                                                <TableRow key={row.id}>
-                                                                    <TableCell component="td" scope="row">
-                                                                        {row.patientID}
-                                                                    </TableCell>
-                                                                    {/* <TableCell component="td" scope="row">
-                                                        {row.campPlanningDet.campName}
-                                                    </TableCell> */}
-                                                                    <TableCell component="td" scope="row">
-                                                                        {row.patientFullName}
-                                                                    </TableCell>
-                                                                    <TableCell align="left">{row.age}</TableCell>
-                                                                    <TableCell align="left">{row.gender}</TableCell>
-                                                                    <TableCell align="left">{row.bloodgroup}</TableCell>
-                                                                    <TableCell align="left">{row.contactNo}</TableCell>
-                                                                    <TableCell align="left">{row.emailAddress}</TableCell>
-                                                                    <TableCell align="left">
-                                                                        {row.address}, {row.city}
-                                                                        <br /> {row.state} - {row.zipCode}
-                                                                    </TableCell>
-                                                                    <TableCell align="left">{row.maritalStatus}</TableCell>
-                                                                    <TableCell align="left">{row.occupation}</TableCell>
-                                                                    <TableCell align="left">{row.primaryLang}</TableCell>
-                                                                    <TableCell align="left">{row.existingMedicalCond}</TableCell>
-                                                                    <TableCell align="left">{row.currentMedications}</TableCell>
-                                                                    <TableCell align="left">{row.allergiesToMedications}</TableCell>
-                                                                    <TableCell align="left">{row.familyMedicalHistory}</TableCell>
-                                                                    <TableCell align="left">{row.reasonForVisiting}</TableCell>
-                                                                    <TableCell align="left">{row.emergencyContactName}</TableCell>
-                                                                    <TableCell align="left">{row.emergencyContactNo}</TableCell>
-                                                                    <TableCell align="left">{row.emergencyPresonRelationship}</TableCell>
-                                                                    <TableCell align="left">{row.aboutCampKnown}</TableCell>
-                                                                    <TableCell align="left">{row.otherInfo}</TableCell>
-                                                                    <TableCell align="left">{row.users.fullName}</TableCell>
-
-                                                                    <TableCell align="center" className='action-items'>
-                                                                        <IconButton className='icon-action'>
-                                                                            <Tooltip title='Edit'>
-                                                                                <ModeEditOutlineOutlined onClick={() => editVolunteerDet(row)} className='icon-action' />
-                                                                            </Tooltip>
-                                                                        </IconButton>
-                                                                        <IconButton className='icon-action'>
-                                                                            <Tooltip title='View'>
-                                                                                <VisibilityOutlined onClick={() => viewVolunteerDet(row)} className='icon-action' />
-                                                                            </Tooltip>
-                                                                        </IconButton>
-                                                                        <IconButton className='icon-action'>
-                                                                            <Tooltip title='attachments'>
-                                                                                <AttachFileIcon onClick={() => handleView(row)}
-                                                                                    className='icon-action' />
-                                                                            </Tooltip>
-                                                                        </IconButton>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            );
-                                                        })}
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
-                                        <TablePagination
-                                            rowsPerPageOptions={[10, 25, 100]}
-                                            component="div"
-                                            count={searchVolntrlists === undefined ? null : searchVolntrlists.length}
-                                            rowsPerPage={rowsPerPage}
-                                            page={page}
-                                            onPageChange={handleChangePage}
-                                            onRowsPerPageChange={handleChangeRowsPerPage}
-                                        />
-                                    </Paper>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <UploadedFilesTable data={selectedPatientDet} handleBack={handleBack} selectedPatientName={selectedPatientName} selectedData={selectedData} />
-                            </>
-                        )}
-                        <UploadJobDet modelType='patientUpload' fetchData={fetchPatientData} isOpen={isModalOpen} onClose={closeModal} />
-                        {isEditModalOpen && (
-                            <EditPatientDet fetchPatientData={fetchPatientData} campIdD={selectCamp} patientCampSelection={patientCampSelection}
-                                userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
-                        )}
-                        <AddVolunteerOption fetchRecords={fetchPatientData} campIdD={selectCamp}
-                            userID={userId} data={selectedData} formMode={formMode} isOptionMode={isOptionMode} isOptionOpen={isOptionOpen}
-                            onOptionClose={() => setisOptionOpen(false)} />
-                        <NotificationContainer />
-                    </section>
-                </div>
-            </div>
-        </>
-    );
-}
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 export default PatientRecords

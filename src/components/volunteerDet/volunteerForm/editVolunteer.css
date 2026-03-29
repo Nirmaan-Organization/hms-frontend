@@ -42,14 +42,8 @@
 .jm-post-job-wrapper input[type=text],
 input[type=number],
 input[type=date],
-<<<<<<< HEAD
 input[type=time],
 .jm-job-select {
-=======
-input[type=search],
-input[type=time],
-.jm-job-select { 
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     width: 100%;
     height: 40px;
     line-height: 40px;

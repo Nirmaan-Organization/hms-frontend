@@ -4,11 +4,8 @@ import { useSelector } from 'react-redux';
 import CampDet from '../../campdetails/CampDet';
 import Dashboard from '../../dashboard/Dashboard';
 import AllPatientRecords from '../../patientDetls/AllPatientRecords';
-<<<<<<< HEAD
 import PatientDet from '../../patientDetls/PatientDet';
-=======
 import PatientRecords from '../../patientDetls/PatientRecords';
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 import Settings from '../../settings/Settings';
 import AllVolunteerRecords from '../../volunteerDet/AllVolunteerRecords';
 import VolunteerDet from '../../volunteerDet/VolunteerDet';
@@ -66,11 +63,7 @@ const Appbar = () => {
                 </section>
                 {sideMenu === 1 && <Dashboard />}
                 {sideMenu === 2 && <CampDet />}
-<<<<<<< HEAD
-                {sideMenu === 3 && <PatientDet />}
-=======
-                {sideMenu === 3 && <PatientRecords />}
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
+                {sideMenu === 3 && <PatientDet />} 
                 {sideMenu === 4 && <AllPatientRecords />}
                 {sideMenu === 5 && <VolunteerDet />}
                 {sideMenu === 6 && <AllVolunteerRecords />}

@@ -13,11 +13,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-<<<<<<< HEAD
-    "chart.js": "^4.4.3",
-=======
-    "chart.js": "^4.4.6",
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
+     "chart.js": "^4.4.6",
     "file-saver": "^2.0.5",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
@@ -38,11 +34,7 @@
   "eslintConfig": {
     "extends": [
       "react-app",
-<<<<<<< HEAD
       "react-app/jest"  
-=======
-      "react-app/jest"
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
     ]
   },
   "browserslist": {

@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 import { Person2Rounded } from '@mui/icons-material';
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 import Logout from '@mui/icons-material/Logout';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -33,12 +30,8 @@ function AccountMenu() {
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', gridColumnGap: '10px' }}>
         <div className="header-name">
-<<<<<<< HEAD
           {/* <p>Hi, {name.slice(name.lastIndexOf(' ') + 1)}</p> */}
-          <h5>Hi, {name} </h5>
-=======
           <h5>Hi, {name.slice(name.lastIndexOf(' ') + 1)}</h5>
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
           <p>{userProfile.role} </p>
         </div>
         <Tooltip title="Account settings">
@@ -48,17 +41,12 @@ function AccountMenu() {
             sx={{ ml: 2 }}
             aria-controls={open ? 'account-menu' : undefined}
             aria-haspopup="true"
-<<<<<<< HEAD
-            aria-expanded={open ? 'true' : undefined} 
+            aria-expanded={open ? 'true' : undefined}
           >
-=======
-            aria-expanded={open ? 'true' : undefined}  >
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
-            <Avatar sx={{ width: 32, height: 32,backgroundColor:'#fff',color:'#000',fontWeight:600 }}>{name.charAt(0)}</Avatar>
+            <Avatar sx={{ width: 32, height: 32, backgroundColor: '#fff', color: '#000', fontWeight: 600 }}>{name.charAt(0)}</Avatar>
           </IconButton>
         </Tooltip>
       </Box>
-<<<<<<< HEAD
       <Menu
         anchorEl={anchorEl}
         id="account-menu"
@@ -101,7 +89,7 @@ function AccountMenu() {
           Profile
         </MenuItem> */}
         {/* <Divider /> */}
-        
+
         <a href='/logout'>
           <MenuItem onClick={handleClose}>
             <ListItemIcon>
@@ -111,9 +99,7 @@ function AccountMenu() {
           </MenuItem>
         </a>
       </Menu>
-=======
-      
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
+
     </>
   );
 }

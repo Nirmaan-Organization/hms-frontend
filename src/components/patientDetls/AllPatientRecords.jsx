@@ -17,11 +17,6 @@ import EditPatientDet from './PatientForm/EditPatientDet';
 import { useDispatch, useSelector } from 'react-redux';
 import DeleteCampDet from '../campdetails/DeleteCampDet';
 import { setCamp } from '../redux/reducer';
-<<<<<<< HEAD
-=======
-import UploadedFilesTable from './UploadedFilesTable';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
 
 function AllPatientRecords() {
 
@@ -148,7 +143,6 @@ function AllPatientRecords() {
         setDeletePop(true);
     }
 
-<<<<<<< HEAD
     return (
         <>
             <div className="container">
@@ -299,186 +293,6 @@ function AllPatientRecords() {
                                 />
                             </Paper>
                         </div>
-=======
-    const [isViewingAttachments, setIsViewingAttachments] = useState(false);
-    const [selectedPatientDet, setSelectedPatientDet] = useState(null);
-    const [selectedPatientName, setSelectedPatientName] = useState(null);
-
-    const handleView = async (row) => {
-        setIsViewingAttachments(true);
-        setSelectedPatientDet(row.id);
-        setSelectedPatientName(row.patientFullName);
-        setSelectedData(row);
-    };
-    const handleBack = () => {
-        setIsViewingAttachments(false);
-        setSelectedPatientDet(null);
-    };
-    return (
-        <>
-            <div className="container">
-                {isViewingAttachments ? (<></>) :
-                    <div className="head-title">
-                        <div className="sesstion-header-name">
-                            <h2>All Patient Details </h2>
-                        </div>
-                    </div>
-                }
-                <div className="table-data">
-                    <section className='main-container'>
-                        {!isViewingAttachments ? (
-                            <>
-                                <div className="sub-container">
-                                    <div className="head">
-                                        <div className="search-filter">
-                                            <input type="text" placeholder="Search with Patient ID, Full name or Contact No"
-                                                onChange={e => setsearchText(e.target.value)}
-                                                value={searchText}
-                                            />
-                                            <select className="jm-search-select"
-                                                value={searchBlood} onChange={(e) => setBloodName(e.target.value)}>
-                                                <option>Select Group</option>
-                                                {bloodList === undefined ?
-                                                    <option>Select Group</option> :
-                                                    bloodList.map((item) => (
-                                                        <option key={item.id} value={item.bloodGroup}>
-                                                            {item.bloodGroup}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                            <Button style={{ height: '20px', fontSize: '10px', width: '25px' }}
-                                                variant="contained" color="error" onClick={clearSearch}>
-                                                Clear
-                                            </Button>
-                                        </div>
-                                        {userRole === "ROLE_SUPER_ADMIN" || userRole === "ROLE_CAMP_ADMIN" ?
-                                            <IconButton className='bx'>
-                                                <Tooltip className='bx' title='Add Patient Details'>
-                                                    <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
-                                                </Tooltip>
-                                            </IconButton>
-                                            : ''}
-                                    </div>
-                                    <Paper className='table-patientAll-container'>
-                                        <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
-                                            <Table size='small' aria-label="a dense table">
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell>Patient ID</TableCell>
-                                                        <TableCell >Patient Name</TableCell>
-                                                        <TableCell >Age</TableCell>
-                                                        <TableCell align="left">Gender</TableCell>
-                                                        <TableCell align="left">Blood Group</TableCell>
-                                                        <TableCell align="left">Contact No</TableCell>
-                                                        <TableCell align="left">Email ID</TableCell>
-                                                        <TableCell align="left">Address</TableCell>
-                                                        <TableCell align="left">Marital Status </TableCell>
-                                                        <TableCell align="left">Occupation</TableCell>
-                                                        <TableCell align="left">Primary Lang</TableCell>
-                                                        <TableCell align="left">Existing Medical Cond</TableCell>
-                                                        <TableCell align="left">Current Medications</TableCell>
-                                                        <TableCell align="left">Allergies To Medications</TableCell>
-                                                        <TableCell align="left">Family Medical History</TableCell>
-                                                        <TableCell align="left">Reason For Visiting</TableCell>
-                                                        <TableCell align="left">Emergency Contact Name</TableCell>
-                                                        <TableCell align="left">Emergency Contact No</TableCell>
-                                                        <TableCell align="left" style={{ width: '500px' }}>Emergency Preson Relation</TableCell>
-                                                        <TableCell align="left">About Camp Known</TableCell>
-                                                        <TableCell align="left">Other Info</TableCell>
-                                                        <TableCell align="left">Created By</TableCell>
-                                                        <TableCell>Action</TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    {searchVolntrlists
-                                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                                        .map((row, index) => {
-
-                                                            return (
-                                                                <TableRow key={row.id}>
-                                                                    <TableCell component="td" scope="row">
-                                                                        {row.patientID}
-                                                                    </TableCell>
-
-                                                                    <TableCell component="td" scope="row">
-                                                                        {row.patientFullName}
-                                                                    </TableCell>
-                                                                    <TableCell align="left">{row.age}</TableCell>
-                                                                    <TableCell align="left">{row.gender}</TableCell>
-                                                                    <TableCell align="left">{row.bloodgroup}</TableCell>
-                                                                    <TableCell align="left">{row.contactNo}</TableCell>
-                                                                    <TableCell align="left">{row.emailAddress}</TableCell>
-                                                                    <TableCell align="left">
-                                                                        {row.address}, {row.city}
-                                                                        <br /> {row.state} - {row.zipCode}
-                                                                    </TableCell>
-                                                                    <TableCell align="left">{row.maritalStatus}</TableCell>
-                                                                    <TableCell align="left">{row.occupation}</TableCell>
-                                                                    <TableCell align="left">{row.primaryLang}</TableCell>
-                                                                    <TableCell align="left">{row.existingMedicalCond}</TableCell>
-                                                                    <TableCell align="left">{row.currentMedications}</TableCell>
-                                                                    <TableCell align="left">{row.allergiesToMedications}</TableCell>
-                                                                    <TableCell align="left">{row.familyMedicalHistory}</TableCell>
-                                                                    <TableCell align="left">{row.reasonForVisiting}</TableCell>
-                                                                    <TableCell align="left">{row.emergencyContactName}</TableCell>
-                                                                    <TableCell align="left">{row.emergencyContactNo}</TableCell>
-                                                                    <TableCell align="left">{row.emergencyPresonRelationship}</TableCell>
-                                                                    <TableCell align="left">{row.aboutCampKnown}</TableCell>
-                                                                    <TableCell align="left">{row.otherInfo}</TableCell>
-                                                                    <TableCell align="left">{row.users.fullName}</TableCell>
-
-                                                                    <TableCell align="center" className='action-items'>
-                                                                        {userRole === "ROLE_SUPER_ADMIN" || userRole === "ROLE_CAMP_ADMIN" ?
-                                                                            <IconButton className='icon-action'>
-                                                                                <Tooltip title='Edit'>
-                                                                                    <ModeEditOutlineOutlined onClick={() => editPatientDet(row)} className='icon-action' />
-                                                                                </Tooltip>
-                                                                            </IconButton>
-                                                                            : ''}
-                                                                        <IconButton className='icon-action'>
-                                                                            <Tooltip title='View'>
-                                                                                <VisibilityOutlined onClick={() => viewPatientDet(row)} className='icon-action' />
-                                                                            </Tooltip>
-                                                                        </IconButton>
-                                                                        <IconButton className='icon-action'>
-                                                                            <Tooltip title='attachments'>
-                                                                                <AttachFileIcon onClick={() => handleView(row)}
-                                                                                    className='icon-action' />
-                                                                            </Tooltip>
-                                                                        </IconButton>
-                                                                        {userRole === "ROLE_SUPER_ADMIN" ?
-                                                                            <IconButton className='icon-action'>
-                                                                                <Tooltip title='Delete'>
-                                                                                    <DeleteOutlineOutlined onClick={() => deletePatient(row)} className='icon-action' />
-                                                                                </Tooltip>
-                                                                            </IconButton> : ''}
-                                                                    </TableCell>
-
-                                                                </TableRow>
-                                                            );
-                                                        })}
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
-                                        <TablePagination
-                                            rowsPerPageOptions={[10, 25, 100]}
-                                            component="div"
-
-                                            count={searchVolntrlists === undefined ? null : searchVolntrlists.length}
-                                            rowsPerPage={rowsPerPage}
-                                            page={page}
-                                            onPageChange={handleChangePage}
-                                            onRowsPerPageChange={handleChangeRowsPerPage}
-                                        />
-                                    </Paper>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <UploadedFilesTable data={selectedPatientDet} handleBack={handleBack} selectedPatientName={selectedPatientName} selectedData={selectedData} />
-                            </>
-                        )}
->>>>>>> 3bb3af2a28093a4c5459755597558057977f0302
                         {isEditModalOpen && (
                             <EditPatientDet fetchPatientData={fetchPatientData} campIdD={''} patientCampSelection={patientCampSelection}
                                 userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
