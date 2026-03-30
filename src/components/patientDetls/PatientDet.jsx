@@ -5,11 +5,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ArrowBackIosNewOutlined, BackHandOutlined, BackpackOutlined } from '@mui/icons-material';
 import { setactiveStyle, setValue } from '../redux/reducer';
 import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
-import { getApiUrl } from '../../config';
 
 const PatientDet = () => {
 
-    const apiUrl = getApiUrl();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const campIdD = useSelector(state => state.myReducer.campId)
 
@@ -43,9 +42,7 @@ const PatientDet = () => {
                             }} />
                         <h2>Patient Details - {campDetls}</h2>
                     </div>
-                    <a href="#" className='btn-download'>
-
-                    </a>
+                   
                 </div>
                 <div className="table-data">
                     <PatientRecords />

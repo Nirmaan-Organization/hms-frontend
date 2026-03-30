@@ -1,18 +1,14 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
+import { Person2Rounded } from '@mui/icons-material';
+import Logout from '@mui/icons-material/Logout';
 import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
-import PersonAdd from '@mui/icons-material/PersonAdd';
-import Settings from '@mui/icons-material/Settings';
-import Logout from '@mui/icons-material/Logout';
-import './appbar.css'
-import { Person2Outlined, Person2Rounded } from '@mui/icons-material';
+import * as React from 'react';
+import './appbar.css';
 
 
 function AccountMenu() {
@@ -25,22 +21,18 @@ function AccountMenu() {
     setAnchorEl(null);
   };
 
-  const storedUser = localStorage.getItem('userData');
-  let name = '';
-
-  try {
-    const userProfile = storedUser ? JSON.parse(storedUser) : null;
-    name = userProfile?.fullName || '';
-  } catch (e) {
-    name = '';
-  }
+  const currentUser = localStorage.getItem('userData')
+  const userProfile = JSON.parse(currentUser)
+  const name = userProfile ? userProfile.fullName : null;
 
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', gridColumnGap: '10px' }}>
         <div className="header-name">
-          <p>Hi, {name ? name.slice(name.lastIndexOf(' ') + 1) : ''}</p>
+          {/* <p>Hi, {name.slice(name.lastIndexOf(' ') + 1)}</p> */}
+          <h5>Hi, {name.slice(name.lastIndexOf(' ') + 1)}</h5>
+          <p>{userProfile.role} </p>
         </div>
         <Tooltip title="Account settings">
           <IconButton style={{ marginLeft: '2px' }}
@@ -51,7 +43,7 @@ function AccountMenu() {
             aria-haspopup="true"
             aria-expanded={open ? 'true' : undefined}
           >
-            <Avatar sx={{ width: 32, height: 32 }}></Avatar>
+            <Avatar sx={{ width: 32, height: 32, backgroundColor: '#fff', color: '#000', fontWeight: 600 }}>{name.charAt(0)}</Avatar>
           </IconButton>
         </Tooltip>
       </Box>
@@ -90,19 +82,14 @@ function AccountMenu() {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem onClick={handleClose}>
+        {/* <MenuItem onClick={handleClose}>
           <ListItemIcon>
             <Person2Rounded fontSize="small" />
           </ListItemIcon>
           Profile
-        </MenuItem>
+        </MenuItem> */}
         {/* <Divider /> */}
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
+
         <a href='/logout'>
           <MenuItem onClick={handleClose}>
             <ListItemIcon>

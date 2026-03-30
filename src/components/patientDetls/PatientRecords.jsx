@@ -1,4 +1,4 @@
-import { DeleteOutlineOutlined, ModeEditOutlineOutlined, UploadFileOutlined, VisibilityOutlined } from '@mui/icons-material';
+import { AddCircleOutlineOutlined, ModeEditOutlineOutlined, UploadFileOutlined, VisibilityOutlined } from '@mui/icons-material';
 import { Button, IconButton, TablePagination, Tooltip } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -7,26 +7,26 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { AddCircleOutlineOutlined } from '@mui/icons-material';
-import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-import './patientDet.css';
-import EditPatientDet from './PatientForm/EditPatientDet';
 import { useSelector } from 'react-redux';
 import UploadJobDet from '../campdetails/UploadFileDiv/UploadJobDet';
-import { getApiUrl } from '../../config';
+import AddVolunteerOption from '../volunteerDet/AddVolunteerOption';
+import './patientDet.css';
+import EditPatientDet from './PatientForm/EditPatientDet';
 
 function PatientRecords() {
 
-    const value = useSelector(state => state.myReducer.value)
+    // const value = useSelector(state => state.myReducer.value)
     const campIdD = useSelector(state => state.myReducer.campId)
 
-    const apiUrl = getApiUrl();
+    const apiUrl = process.env.REACT_APP_API_URL;
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
     const userId = userProfile ? userProfile.id : null;
+    const userRole = userProfile ? userProfile.role : null;
+
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -43,12 +43,22 @@ function PatientRecords() {
     }, [])
     const [allPatientRecords, setAllPatientRecords] = useState([])
 
-    const [selectCamp, setselectCamp] = useState(campIdD == '' ? null : campIdD)
+    const [selectCamp, setselectCamp] = useState(campIdD === '' ? null : campIdD)
 
+    const [bloodList, setBloodList] = useState([])
+    useEffect(() => {
+        fetch(`${apiUrl}/getBloodGroups`)
+            .then(response => response.json())
+            .then(data => {
+                setBloodList(data)
+            }).catch(err => {
+
+            })
+    }, [])
     const fetchPatientData = async () => {
 
         try {
-            const res = await fetch(`${apiUrl}/getCampPatientDetls/${selectCamp}`);
+            const res = await fetch(`${apiUrl}/getOneCamp/${selectCamp}`);
             const result = await res.json();
 
             if (result.status === 'FAILED') {
@@ -56,7 +66,7 @@ function PatientRecords() {
                 const result = await res.json();
                 setAllPatientRecords(result)
             } else {
-                setAllPatientRecords(result)
+                setAllPatientRecords(result.data.patientDetls)
             }
 
         } catch (err) {
@@ -70,26 +80,27 @@ function PatientRecords() {
     }, []);
 
     const [searchText, setsearchText] = useState('')
-    const searchVolntrlists = allPatientRecords.filter(item =>
+    const [searchBlood, setBloodName] = useState('')
+    const searchWthBlood = allPatientRecords.filter(item =>
         searchText ? item.patientFullName !== null && item.patientFullName.toLowerCase().includes(searchText.toLowerCase())
             || item.patientID !== null && item.patientID.includes(searchText)
-            || item.contactNo !== null && item.contactNo.includes(searchText)
-
+            || item.contactNo !== null && item.contactNo.includes(searchText) : true
+                && userRole === "ROLE_SUPER_ADMIN" ? true : userId ? item.created_by === userId : true
+    )
+    const searchVolntrlists = searchWthBlood.filter(item =>
+        searchBlood ? item.bloodgroup !== null && item.bloodgroup.toLowerCase().includes(searchBlood.toLowerCase())
             : true
     )
 
-    // const volunteerLists = searchVolntrlists.filter(item =>
-    //     selectCamp ? item.campId !== null && item.campId == selectCamp : true
-    // )
-
     const clearSearch = () => {
-        // setselectCamp('')
+        setBloodName('')
         setsearchText('')
     }
 
     const [isEditModalOpen, setEditModalOpen] = useState(false)
     const [selectedData, setSelectedData] = useState(null)
     const [formMode, setformMode] = useState('')
+    const [patientCampSelection, setpatientCampSelection] = useState('')
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -101,6 +112,7 @@ function PatientRecords() {
     };
 
     const addRecord = (row, add) => {
+        setpatientCampSelection('SingleCamp')
         setSelectedData(null);
         setformMode('add')
         setEditModalOpen(true);
@@ -119,31 +131,6 @@ function PatientRecords() {
     }
 
 
-    const deleteVolunteer = async (row) => {
-        let payload = {
-            "created_by": userId
-        }
-
-        try {
-            const res = await fetch(`${apiUrl}/deleteVolunteer/${row.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-
-            } else {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-            }
-        } catch (error) {
-            NotificationManager.success(error)
-        }
-    }
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const openModal = () => {
@@ -153,6 +140,14 @@ function PatientRecords() {
     const closeModal = () => {
         setIsModalOpen(false);
     };
+
+
+    const [isOptionOpen, setisOptionOpen] = useState(false)
+    const [isOptionMode, setisOptionMode] = useState('')
+    const addOptionOpen = (row) => {
+        setisOptionOpen(true)
+        setisOptionMode('Patients')
+    }
 
     return (
         <>
@@ -164,6 +159,17 @@ function PatientRecords() {
                                 onChange={e => setsearchText(e.target.value)}
                                 value={searchText}
                             />
+                            <select className="jm-search-select"
+                                value={searchBlood} onChange={(e) => setBloodName(e.target.value)}>
+                                <option>Select Group</option>
+                                {bloodList === undefined ?
+                                    <option>Select Group</option> :
+                                    bloodList.map((item) => (
+                                        <option key={item.id} value={item.bloodGroup}>
+                                            {item.bloodGroup}
+                                        </option>
+                                    ))}
+                            </select>
                             <Button style={{ height: '20px', fontSize: '10px', width: '25px' }}
                                 variant="contained" color="error" onClick={clearSearch}>
                                 Clear
@@ -176,25 +182,27 @@ function PatientRecords() {
                                 </Tooltip>
                             </IconButton>
                             <IconButton className='bx'>
-                                <Tooltip className='bx' title='Add Camp Details'>
-                                    <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
+                                <Tooltip className='bx' title='Add Patient Details'>
+                                    <AddCircleOutlineOutlined className='bx'
+                                        onClick={() => addRecord(null)}
+                                    // onClick={() => addOptionOpen(null)}
+
+                                    /> 
                                 </Tooltip>
                             </IconButton>
 
                         </div>
                     </div>
                     <Paper className='table-patient-container'>
-                        <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+                        <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
                             <Table size='small' aria-label="a dense table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={{ display: 'flex', alignItems: 'center' }} >Patient ID
-                                            {/* <SwapVertOutlinedIcon style={{fontSize:'15px'}}/>  */}
-                                        </TableCell>
-                                        <TableCell >Camp Name</TableCell>
+                                        <TableCell>Patient ID</TableCell>
                                         <TableCell >Patient FullName</TableCell>
                                         <TableCell >Age</TableCell>
                                         <TableCell align="left">Gender</TableCell>
+                                        <TableCell align="left">Blood Group</TableCell>
                                         <TableCell align="left">Contact No</TableCell>
                                         <TableCell align="left">Email ID</TableCell>
                                         <TableCell align="left">Address</TableCell>
@@ -225,14 +233,15 @@ function PatientRecords() {
                                                     <TableCell component="td" scope="row">
                                                         {row.patientID}
                                                     </TableCell>
-                                                    <TableCell component="td" scope="row">
+                                                    {/* <TableCell component="td" scope="row">
                                                         {row.campPlanningDet.campName}
-                                                    </TableCell>
+                                                    </TableCell> */}
                                                     <TableCell component="td" scope="row">
                                                         {row.patientFullName}
                                                     </TableCell>
                                                     <TableCell align="left">{row.age}</TableCell>
                                                     <TableCell align="left">{row.gender}</TableCell>
+                                                    <TableCell align="left">{row.bloodgroup}</TableCell>
                                                     <TableCell align="left">{row.contactNo}</TableCell>
                                                     <TableCell align="left">{row.emailAddress}</TableCell>
                                                     <TableCell align="left">
@@ -265,11 +274,6 @@ function PatientRecords() {
                                                                 <VisibilityOutlined onClick={() => viewVolunteerDet(row)} className='icon-action' />
                                                             </Tooltip>
                                                         </IconButton>
-                                                        <IconButton className='icon-action'>
-                                                            <Tooltip title='Delete'>
-                                                                <DeleteOutlineOutlined onClick={() => deleteVolunteer(row)} className='icon-action' />
-                                                            </Tooltip>
-                                                        </IconButton>
                                                     </TableCell>
 
                                                 </TableRow>
@@ -293,13 +297,15 @@ function PatientRecords() {
                 <UploadJobDet modelType='patientUpload' fetchData={fetchPatientData} isOpen={isModalOpen} onClose={closeModal} />
 
                 {isEditModalOpen && (
-                    <EditPatientDet fetchPatientData={fetchPatientData} campIdD={campIdD}
+                    <EditPatientDet fetchPatientData={fetchPatientData} campIdD={selectCamp} patientCampSelection={patientCampSelection}
                         userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
                 )}
+                <AddVolunteerOption fetchRecords={fetchPatientData} campIdD={selectCamp}
+                    userID={userId} data={selectedData} formMode={formMode} isOptionMode={isOptionMode} isOptionOpen={isOptionOpen}
+                    onOptionClose={() => setisOptionOpen(false)} />
+
                 <NotificationContainer />
             </section>
-
-
         </>
     );
 }

@@ -1,40 +1,36 @@
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
+import { AddCircleOutlineOutlined, DeleteOutlineOutlined, ModeEditOutlineOutlined, VisibilityOutlined } from '@mui/icons-material';
+import { Button, IconButton, TablePagination, Tooltip } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { DeleteOutlineOutlined, ModeEditOutlineOutlined, ViewInArOutlined, VisibilityOutlined } from '@mui/icons-material';
-import { IconButton, TextField, TablePagination, Tooltip, Button } from '@mui/material';
-import { useState, useEffect } from 'react';
-// import EditCampDet from './campForm/EditCampDet';
-import { AddCircleOutlineOutlined, Search, SearchOutlined } from '@mui/icons-material';
-import './volunteerDet.css'
-import { NotificationContainer, NotificationManager } from 'react-notifications';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-import SwapVertOutlinedIcon from '@mui/icons-material/SwapVertOutlined';
-import EditVolunteerDet from './volunteerForm/EditVolunteerDet';
-import { useSelector } from 'react-redux';
-import { getApiUrl } from '../../config';
+import DeleteCampDet from '../campdetails/DeleteCampDet';
+import EditAllVolunteerDet from './AllvolunteerForm/EditAllVolunteerDet';
+import './volunteerDet.css';
 
 function AllVolunteerRecords() {
 
-    const apiUrl = getApiUrl();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
     const userId = userProfile ? userProfile.id : null;
+    const userRole = userProfile ? userProfile.role : null;
 
-    const [preferredRoles, setpreferredRoles] = useState([])
 
+    const [preferredRoleList, setPreferredRoles] = useState([])
     useEffect(() => {
-        fetch(`${apiUrl}/getAllPreRoleDetls`)
+        fetch(`${apiUrl}/getAllRoles`)
             .then(response => response.json())
             .then(data => {
-                setpreferredRoles(data)
+                setPreferredRoles(data)
             }).catch(err => {
 
             })
@@ -47,12 +43,12 @@ function AllVolunteerRecords() {
 
     const fetchVoluntrData = async () => {
         try {
-            const res = await fetch(`${apiUrl}/getUserList`);
+            const res = await fetch(`${apiUrl}/getVolunteerDet`);
             const result = await res.json()
             if (result.status === 'FAILED') {
 
             } else {
-                setallVolunteer(result.data)
+                setallVolunteer(result)
 
             }
         } catch (err) {
@@ -67,17 +63,21 @@ function AllVolunteerRecords() {
 
     const [searchText, setsearchText] = useState('')
     const [selectType, setselectType] = useState('')
+
+
+
+
     const searchVolntrlists = allVolunteers.filter(item =>
-        searchText
-            ? (item.volunteerName || '').toLowerCase().includes(searchText.toLowerCase())
-            : true
+        searchText ? item.volunteerName !== null && item.volunteerName.toLowerCase().includes(searchText.toLowerCase()) : true
     )
 
-    const volunteerLists = searchVolntrlists.filter(item =>
-        selectType
-            ? (item.preferredRole || '').toLowerCase().includes(selectType.toLowerCase())
-            : true
-    )
+    const volunteerLists = searchVolntrlists.filter(item => {
+        const roleMatches = selectType ? item.users.roles?.name !== null && item.users.roles.name.toLowerCase().includes(selectType.toLowerCase()) : true;
+        const isSuperAdmin = userRole === "ROLE_SUPER_ADMIN";
+        const createdByMatches = userId ? item.created_by === userId : true;
+
+        return roleMatches && (isSuperAdmin || createdByMatches);
+    })
 
     const clearSearch = () => {
         setselectType('')
@@ -115,45 +115,14 @@ function AllVolunteerRecords() {
         setEditModalOpen(true);
     }
 
+    const [deletePop, setDeletePop] = useState(false);
+    const [deleteOption, setDeleteOption] = useState(false);
 
-    const deleteVolunteer = async (row) => {
-        let payload = {
-            "created_by": userId
-        }
-
-        try {
-            const res = await fetch(`${apiUrl}/deleteVolunteer/${row.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-
-            } else {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-            }
-        } catch (error) {
-            NotificationManager.success(error)
-        }
+    const deleteVolunteer = (row) => {
+        setSelectedData(row);
+        setDeleteOption('Volunteer')
+        setDeletePop(true);
     }
-    const campIdD = useSelector(state => state.myReducer.campId)
-
-    const [campDetls, setCampDetls] = useState([])
-
-    useEffect(() => {
-        fetch(`${apiUrl}/getOneCamp/${campIdD}`)
-            .then(response => response.json())
-            .then(data => {
-                setCampDetls(data.campName)
-            }).catch(err => {
-                setCampDetls('')
-            })
-    }, [])
 
     return (
         <>
@@ -162,9 +131,6 @@ function AllVolunteerRecords() {
                     <div className="left" style={{ display: 'flex', gridGap: '10px' }}>
                         <h2>All Volunteer Details</h2>
                     </div>
-                    <a href="#" className='btn-download'>
-
-                    </a>
                 </div>
                 <div className="table-data">
                     <section className='main-container'>
@@ -179,11 +145,11 @@ function AllVolunteerRecords() {
                                         onChange={e => setselectType(e.target.value)}
                                         value={selectType}>
                                         <option>Select Preferred Role</option>
-                                        {preferredRoles === undefined ?
-                                            <option>Select Activity Type</option> :
-                                            preferredRoles.map((item) => (
-                                                <option key={item.id} value={item.preferredRoleName}>
-                                                    {item.preferredRoleName}
+                                        {preferredRoleList === undefined ?
+                                            <option>Select Preferred Role</option> :
+                                            preferredRoleList.map((item) => (
+                                                <option key={item.id} value={item.name}>
+                                                    {item.name}
                                                 </option>
                                             ))}
 
@@ -195,21 +161,18 @@ function AllVolunteerRecords() {
                                 </div>
 
                                 <IconButton className='bx'>
-                                    <Tooltip className='bx' title='Add Camp Details'>
+                                    <Tooltip className='bx' title='Add Volunteer Details'>
                                         <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
                                     </Tooltip>
                                 </IconButton>
 
                             </div>
                             <Paper className='table-volunteer-container'>
-                                <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+                                <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
                                     <Table size='small' aria-label="a dense table">
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell style={{ display: 'flex', alignItems: 'center' }} >volunteer ID
-                                                    {/* <SwapVertOutlinedIcon style={{fontSize:'15px'}}/>  */}
-                                                </TableCell>
-                                                <TableCell >Camp ID</TableCell>
+                                                <TableCell >Volunteer ID </TableCell>
                                                 <TableCell >Volunteer Name</TableCell>
                                                 <TableCell align="left">Date Of Birth</TableCell>
                                                 <TableCell align="left">Contact No</TableCell>
@@ -228,25 +191,20 @@ function AllVolunteerRecords() {
                                                     return (
                                                         <TableRow key={row.id}>
                                                             <TableCell component="td" scope="row">
-                                                                {row.userID}
+                                                                {row.volunteerID}
                                                             </TableCell>
                                                             <TableCell component="td" scope="row">
-                                                                {row.campPlanningDet[0] === undefined ? '' : row.campPlanningDet[0].campID}
-                                                            </TableCell>
-                                                            <TableCell component="td" scope="row">
-                                                                {row.fullName}
+                                                                {row.volunteerName}
                                                             </TableCell>
                                                             <TableCell align="left">{row.dateOfBirth}</TableCell>
-                                                            <TableCell align="left">{row.contactNO}</TableCell>
-                                                            <TableCell align="left">{row.email}</TableCell>
+                                                            <TableCell align="left">{row.contactNo}</TableCell>
+                                                            <TableCell align="left">{row.users.email}</TableCell>
                                                             <TableCell align="left">
                                                                 {row.street}, {row.city}
                                                                 <br /> {row.state} - {row.zipCode}
                                                             </TableCell>
                                                             <TableCell align="left">{row.skillExpertise}</TableCell>
-
-                                                            <TableCell align="left">{row.roles.name}</TableCell>
-
+                                                            <TableCell align="left">{row.users.roles.name}</TableCell>
                                                             <TableCell align="center" className='action-items'>
                                                                 <IconButton className='icon-action'>
                                                                     <Tooltip title='Edit'>
@@ -258,11 +216,19 @@ function AllVolunteerRecords() {
                                                                         <VisibilityOutlined onClick={() => viewVolunteerDet(row)} className='icon-action' />
                                                                     </Tooltip>
                                                                 </IconButton>
-                                                                <IconButton className='icon-action'>
-                                                                    <Tooltip title='Delete'>
-                                                                        <DeleteOutlineOutlined onClick={() => deleteVolunteer(row)} className='icon-action' />
+                                                                {userRole === "ROLE_SUPER_ADMIN" ?
+                                                                    <IconButton className='icon-action'>
+                                                                        <Tooltip title='Delete'>
+                                                                            <DeleteOutlineOutlined onClick={() => deleteVolunteer(row)} className='icon-action' />
+                                                                        </Tooltip>
+                                                                    </IconButton>
+                                                                    : ''}
+                                                                {/* <IconButton className='icon-action'>
+                                                                    <Tooltip title='Assign Time slot'>
+                                                                        <TodayOutlined onClick={() => ''} className='icon-action' />
                                                                     </Tooltip>
-                                                                </IconButton>
+                                                                </IconButton> */}
+
                                                             </TableCell>
 
                                                         </TableRow>
@@ -284,14 +250,15 @@ function AllVolunteerRecords() {
                             </Paper>
                         </div>
                         {isEditModalOpen && (
-                            <EditVolunteerDet fetchVoluntrData={fetchVoluntrData} userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
+                            <EditAllVolunteerDet fetchVoluntrData={fetchVoluntrData} userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
                         )}
-                        <NotificationContainer />
+                        {deletePop && (
+                            <DeleteCampDet deleteItem={deleteOption} data={selectedData} isDeletePop={deletePop} OnDeletePopClose={() => setDeletePop(false)} userId={userId} fetchData={fetchVoluntrData} />
+                        )}
                     </section>
                 </div>
             </div>
-
-
+            <NotificationContainer />
         </>
     );
 }

@@ -1,0 +1,34 @@
+.btn-sendfile {
+    position: relative;
+    border: 0;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff;
+    background-color: #1967d2;
+    font-size: 13px;
+    border-radius: 8px;
+    font-weight: 400;
+    padding: 10px 15px 10px;
+    cursor: pointer;
+
+}
+
+.forms-controfl input[type=file] {
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    margin-bottom: 15px;
+    border: 1px solid #998c8c;
+    border-radius: 5px;
+    padding: 0 20px;
+    font-size: 15px;
+}
+
+#input-body {
+    border: 0;
+}
+
+#uploadfile-input {
+    padding: 20px;
+
+}

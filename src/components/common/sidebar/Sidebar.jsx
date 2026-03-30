@@ -1,45 +1,37 @@
-import { DashboardCustomizeOutlined, GroupAddTwoTone, LocalHospitalTwoTone, LogoutOutlined, SettingsApplicationsOutlined, QueryStatsOutlined } from '@mui/icons-material';
+import { DashboardCustomizeOutlined, GroupAddTwoTone, Inventory2Outlined, LocalHospitalTwoTone, LogoutOutlined, SettingsApplicationsOutlined, VerifiedUserOutlined } from '@mui/icons-material';
 import HolidayVillageOutlinedIcon from '@mui/icons-material/HolidayVillageOutlined';
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import headerIcon from '../../../images/hms-icon.png';
+import headerLogo from '../../../images/hms-logo.png';
 import { setValue } from '../../redux/reducer';
 import './sidebar.css';
-import headerLogo from '../../../images/hms-logo.png'
-import headerIcon from '../../../images/hms-icon.png'
-import { isHccAdmin, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
+ 
+const Sidebar = ({ hideStyle, userData }) => {
 
-const Sidebar = ({ hideStyle }) => {
+  const userRole = userData.role;
 
-  const canSeeHcc = isSuperAdmin() || isHccRole();
-  const canSeeHccStats = isSuperAdmin() || isHccAdmin();
+  const masterRole = ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']
+  const specifyRole = ['ROLE_HEALTHCARE_PROVIDER']
+
 
   const sidebarIcons = [
-    {
-      id: 1, menuItem: 'Dashboard',
-      iconImg: <DashboardCustomizeOutlined className='bx' />, menuLink: '/'
-    },
-    { id: 2, menuItem: 'Camp Management', iconImg: <HolidayVillageOutlinedIcon className='bx' />, menuLink: '/' },
-    { id: 4, menuItem: 'All Patient Details', iconImg: <LocalHospitalTwoTone className='bx' />, menuLink: '/' },
-    { id: 6, menuItem: 'All Volunteer Details', iconImg: <GroupAddTwoTone className='bx' />, menuLink: '/' },
-    ...(canSeeHcc ? [
-      { id: 9, menuItem: 'HCC Data Entry', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '/' },
-      { id: 10, menuItem: 'HCC Records', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '/' },
-    ] : []),
-    ...(canSeeHccStats ? [
-      { id: 11, menuItem: 'HCC Dashboard', iconImg: <QueryStatsOutlined className='bx' />, menuLink: '/' },
-    ] : []),
-    // { id: 7, menuItem: 'Inventory Management', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '/' }
+    masterRole.includes(userRole) ? { id: 1, menuItem: 'Dashboard', iconImg: <DashboardCustomizeOutlined className='bx' />, menuLink: '#' } : '',
+    { id: 2, menuItem: 'Camp Management', iconImg: <HolidayVillageOutlinedIcon className='bx' />, menuLink: '#' },
+    masterRole.includes(userRole) || specifyRole.includes(userRole) ? { id: 4, menuItem: 'Patient Information', iconImg: <LocalHospitalTwoTone className='bx' />, menuLink: '#' } : '',
+    masterRole.includes(userRole) ? { id: 6, menuItem: 'All Volunteer Details', iconImg: <GroupAddTwoTone className='bx' />, menuLink: '#' } : '',
+    // userRole === 'ROLE_SUPER_ADMIN' || userRole === 'ROLE_ADMIN' ? { id: 7, menuItem: 'Inventory Management', iconImg: <Inventory2Outlined className='bx' />, menuLink: '#' } : '',
+    userRole === 'ROLE_SUPER_ADMIN' ? { id: 9, menuItem: 'User Management', iconImg: <VerifiedUserOutlined className='bx' />, menuLink: '#' } : ''
   ]
 
   const commonSidebar = [
     {
       id: 8, menuItem: 'Settings',
-      iconImg: <SettingsApplicationsOutlined className='bx' />, menuLink: '/',
+      iconImg: <SettingsApplicationsOutlined className='bx' />, menuLink: '#',
       styleClr: ''
     },
     {
-      id: 7, menuItem: 'Logout',
+      id: 10, menuItem: 'Logout',
       iconImg: <LogoutOutlined className='bx' />, menuLink: '/logout',
       styleClr: 'red'
     },
@@ -52,14 +44,14 @@ const Sidebar = ({ hideStyle }) => {
   const styleChange = (data) => {
     setactiveStyle(data.id);
     dispatch(setValue(data.id))
-  }
+  } 
 
 
   return (
     <section className='sidebar' id={hideStyle}>
-      <a href="/" className='brand' onClick={(e) => e.preventDefault()}>
+      <a href="#" className='brand'>
         <div className="form-input">
-        <img src={headerIcon} className='img-icon2' alt="Logo" />
+          <img src={headerIcon} className='img-icon2' alt="Logo" />
           {hideStyle === 'hide' ?
             <img src={headerIcon} className='img-icon' alt="Logo" /> :
             <img src={headerLogo} className='img-logo' alt="Logo" id={hideStyle} />
@@ -68,23 +60,27 @@ const Sidebar = ({ hideStyle }) => {
         </div>
       </a>
       <ul className="side-menu top">
-        {sidebarIcons.map((data, index) =>
-          <li key={index}
-            className={activeStyle === data.id ? 'active' : ''}
-            onClick={() => styleChange(data)}>
-            <a href="/" onClick={(e) => e.preventDefault()}>
-              {data.iconImg}
-              <span className="text">{data.menuItem}</span>
-            </a>
-          </li>
-        )}
+        {sidebarIcons && sidebarIcons.length > 0 ? (
+          sidebarIcons.filter(item => item && item !== '').map((data, index) =>
+            <li key={index}
+              className={activeStyle === data.id ? 'active' : ''}
+              onClick={() => styleChange(data)}> 
+              <a href={data.menuLink} >
+                {data.iconImg}
+                <span className="text">{data.menuItem}</span>
+              </a>
+            </li>
+          ))
+          : (
+            <div>No data available</div>
+          )}
       </ul>
       <ul className='side-menu'>
         {commonSidebar.map((data, index) =>
           <li style={{ color: data.styleClr }} key={index}
             className={activeStyle === data.id ? 'active' : ''}
             onClick={() => styleChange(data)}>
-            <a href={data.id === 6 ? '#' : data.menuLink}>
+            <a href={data.menuLink}>
               {data.iconImg}
               <span className="text">{data.menuItem}</span>
             </a>

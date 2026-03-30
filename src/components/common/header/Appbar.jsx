@@ -1,22 +1,26 @@
-import React, { useState } from 'react'
-import './appbar.css'
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import Sidebar from '../sidebar/Sidebar';
-import Dashboard from '../../dashboard/Dashboard';
-import CampDet from '../../campdetails/CampDet';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import VolunteerDet from '../../volunteerDet/VolunteerDet';
-import Settings from '../../settings/Settings';
-import AccountMenu from './AccountMenu';
-import PatientDet from '../../patientDetls/PatientDet';
+import CampDet from '../../campdetails/CampDet';
+import Dashboard from '../../dashboard/Dashboard';
 import AllPatientRecords from '../../patientDetls/AllPatientRecords';
+import PatientDet from '../../patientDetls/PatientDet';
+import PatientRecords from '../../patientDetls/PatientRecords';
+import Settings from '../../settings/Settings';
 import AllVolunteerRecords from '../../volunteerDet/AllVolunteerRecords';
-import HealthFormPage from '../../healthForm/page';
-import HCCRecords from '../../healthForm/HCCRecords';
-import Statistics from '../../healthForm/Statistics';
-import { isHccAdmin, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
+import VolunteerDet from '../../volunteerDet/VolunteerDet';
+import Sidebar from '../sidebar/Sidebar';
+import AccountMenu from './AccountMenu';
+import './appbar.css';
+import UserDet from '../../userdetails/UserDet';
 
 const Appbar = () => {
+
+    const currentUser = localStorage.getItem('userData')
+    const userProfile = JSON.parse(currentUser)
+    const name = userProfile ? userProfile.fullName : null;
+    const userRole = userProfile.role;
+    const masterRole = ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']
 
     const [hideSidebar, sethideSidebar] = useState('')
 
@@ -24,15 +28,17 @@ const Appbar = () => {
         sethideSidebar(e);
     }
 
-    const value = useSelector(state => state.myReducer.value)
-    const sideMenu = value === '' ? 1 : value;
 
-    const canSeeHcc = isSuperAdmin() || isHccRole();
-    const canSeeHccStats = isSuperAdmin() || isHccAdmin();
+    const value = useSelector(state => state.myReducer.value)
+    const actStyle = useSelector(state => state.myReducer.activeStyle)
+    const sideMenu = value === '' ? masterRole.includes(userRole) ? 1 : 2 : value;
+
+
+
 
     return (
         <>
-            <Sidebar hideStyle={hideSidebar} />
+            <Sidebar hideStyle={hideSidebar} userData={userProfile} />
             <div className='container-main' id={hideSidebar}>
                 <section className='content'>
                     <div>
@@ -46,16 +52,10 @@ const Appbar = () => {
                             }
                             <div className="form-input">
                                 {/* <img src={headerLogo} alt="Logo" /> */}
-                                {/* <a href='#' className='nav-link'>Health Camp Org</a> */}
+                                {/* <h4  className='nav-link'>Health Management System</h4> */}
                             </div>
                             <div className="header-profile">
                                 <AccountMenu />
-                                {/* <div className="header-name">
-                                    <p>Hi, {name.slice(name.lastIndexOf(' ') + 1)}</p>
-                                </div>
-                                <a href='#' className='profile'>
-                                    <img src={avatar} alt="" />
-                                </a> */}
                             </div>
 
                         </nav>
@@ -63,14 +63,12 @@ const Appbar = () => {
                 </section>
                 {sideMenu === 1 && <Dashboard />}
                 {sideMenu === 2 && <CampDet />}
-                {sideMenu === 3 && <PatientDet />}
+                {sideMenu === 3 && <PatientDet />} 
                 {sideMenu === 4 && <AllPatientRecords />}
                 {sideMenu === 5 && <VolunteerDet />}
                 {sideMenu === 6 && <AllVolunteerRecords />}
                 {sideMenu === 8 && <Settings />}
-                {sideMenu === 9 && (canSeeHcc ? <HealthFormPage /> : <Dashboard />)}
-                {sideMenu === 10 && (canSeeHcc ? <HCCRecords /> : <Dashboard />)}
-                {sideMenu === 11 && (canSeeHccStats ? <Statistics /> : <Dashboard />)}
+                {sideMenu === 9 && <UserDet />}
             </div>
         </>
     )

@@ -14,18 +14,21 @@ import { NotificationContainer, NotificationManager } from 'react-notifications'
 import 'react-notifications/lib/notifications.css';
 import './patientDet.css';
 import EditPatientDet from './PatientForm/EditPatientDet';
-import { useSelector } from 'react-redux';
-import { getApiUrl } from '../../config';
+import { useDispatch, useSelector } from 'react-redux';
+import DeleteCampDet from '../campdetails/DeleteCampDet';
+import { setCamp } from '../redux/reducer';
 
 function AllPatientRecords() {
 
-    const value = useSelector(state => state.myReducer.value)
+    // const value = useSelector(state => state.myReducer.value)
     const campIdD = useSelector(state => state.myReducer.campId)
 
-    const apiUrl = getApiUrl();
+    const apiUrl = process.env.REACT_APP_API_URL;
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
+
     const userId = userProfile ? userProfile.id : null;
+    const userRole = userProfile ? userProfile.role : null;
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -42,7 +45,18 @@ function AllPatientRecords() {
     }, [])
     const [allPatientRecords, setAllPatientRecords] = useState([])
 
-    const [selectCamp, setselectCamp] = useState(campIdD == '' ? null : campIdD)
+    const [selectCamp, setselectCamp] = useState(campIdD === '' ? null : campIdD)
+
+    const [bloodList, setBloodList] = useState([])
+    useEffect(() => {
+        fetch(`${apiUrl}/getBloodGroups`)
+            .then(response => response.json())
+            .then(data => {
+                setBloodList(data)
+            }).catch(err => {
+
+            })
+    }, [])
 
     const fetchPatientData = async () => {
 
@@ -60,34 +74,33 @@ function AllPatientRecords() {
         }
     }
 
-    console.log('patient detls', allPatientRecords);
-
-
     useEffect(() => {
         fetchPatientData();
     }, []);
 
     const [searchText, setsearchText] = useState('')
-    const searchVolntrlists = allPatientRecords.filter(item =>
+    const [searchBlood, setBloodName] = useState('')
+
+    const searchWthBlood = allPatientRecords.filter(item =>
         searchText ? item.patientFullName !== null && item.patientFullName.toLowerCase().includes(searchText.toLowerCase())
             || item.patientID !== null && item.patientID.includes(searchText)
-            || item.contactNo !== null && item.contactNo.includes(searchText)
-
+            || item.contactNo !== null && item.contactNo.includes(searchText) : true
+                && userRole === "ROLE_SUPER_ADMIN" ? true : userId ? item.created_by === userId : true
+    )
+    const searchVolntrlists = searchWthBlood.filter(item =>
+        searchBlood ? item.bloodgroup !== null && item.bloodgroup.toLowerCase().includes(searchBlood.toLowerCase())
             : true
     )
 
-    // const volunteerLists = searchVolntrlists.filter(item =>
-    //     selectCamp ? item.campId !== null && item.campId == selectCamp : true
-    // )
-
     const clearSearch = () => {
-        // setselectCamp('')
+        setBloodName('')
         setsearchText('')
     }
 
     const [isEditModalOpen, setEditModalOpen] = useState(false)
     const [selectedData, setSelectedData] = useState(null)
     const [formMode, setformMode] = useState('')
+    const [patientCampSelection, setpatientCampSelection] = useState('')
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -97,50 +110,37 @@ function AllPatientRecords() {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
+    const dispatch = useDispatch();
 
     const addRecord = (row, add) => {
+        setpatientCampSelection('MultiCamp')
         setSelectedData(null);
+        dispatch(setCamp(''))
         setformMode('add')
         setEditModalOpen(true);
     }
 
-    const editVolunteerDet = (row, edit) => {
+    const editPatientDet = (row, edit) => {
+        setpatientCampSelection('MultiCamp')
+        dispatch(setCamp(''))
         setSelectedData(row);
         setformMode('edit')
         setEditModalOpen(true);
     }
 
-    const viewVolunteerDet = (row, view) => {
+    const viewPatientDet = (row, view) => {
         setSelectedData(row);
         setformMode('view')
         setEditModalOpen(true);
     }
 
+    const [deletePop, setDeletePop] = useState(false);
+    const [deleteOption, setDeleteOption] = useState(false);
 
-    const deleteVolunteer = async (row) => {
-        let payload = {
-            "created_by": userId
-        }
-
-        try {
-            const res = await fetch(`${apiUrl}/deleteVolunteer/${row.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-
-            } else {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-            }
-        } catch (error) {
-            NotificationManager.success(error)
-        }
+    const deletePatient = (row) => {
+        setSelectedData(row);
+        setDeleteOption('Patient')
+        setDeletePop(true);
     }
 
     return (
@@ -150,9 +150,6 @@ function AllPatientRecords() {
                     <div className="left" style={{ display: 'flex', gridGap: '10px' }}>
                         <h2>All Patient Details </h2>
                     </div>
-                    <a href="#" className='btn-download'>
-
-                    </a>
                 </div>
                 <div className="table-data">
                     <section className='main-container'>
@@ -163,44 +160,41 @@ function AllPatientRecords() {
                                         onChange={e => setsearchText(e.target.value)}
                                         value={searchText}
                                     />
-                                    {/* <select className="search-text" disabled
-                                onChange={e => setselectCamp(e.target.value)}
-                                value={selectCamp}>
-                                <option>Select Camp Name</option>
-                                {campDetls === undefined ?
-                                    <option>Select camp Name</option> :
-                                    campDetls.map((item) => (
-                                        <option key={item.id} value={item.id}>
-                                            {item.campName}
-                                        </option>
-                                    ))}
-
-                            </select> */}
+                                    <select className="jm-search-select"
+                                        value={searchBlood} onChange={(e) => setBloodName(e.target.value)}>
+                                        <option>Select Group</option>
+                                        {bloodList === undefined ?
+                                            <option>Select Group</option> :
+                                            bloodList.map((item) => (
+                                                <option key={item.id} value={item.bloodGroup}>
+                                                    {item.bloodGroup}
+                                                </option>
+                                            ))}
+                                    </select>
                                     <Button style={{ height: '20px', fontSize: '10px', width: '25px' }}
                                         variant="contained" color="error" onClick={clearSearch}>
                                         Clear
                                     </Button>
                                 </div>
-
-                                <IconButton className='bx'>
-                                    <Tooltip className='bx' title='Add Camp Details'>
-                                        <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
-                                    </Tooltip>
-                                </IconButton>
+                                {userRole === "ROLE_SUPER_ADMIN" || userRole === "ROLE_CAMP_ADMIN" ?
+                                    <IconButton className='bx'>
+                                        <Tooltip className='bx' title='Add Patient Details'>
+                                            <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
+                                        </Tooltip>
+                                    </IconButton>
+                                    : ''}
 
                             </div>
-                            <Paper className='table-patient-container'>
-                                <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+                            <Paper className='table-patientAll-container'>
+                                <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
                                     <Table size='small' aria-label="a dense table">
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell style={{ display: 'flex', alignItems: 'center' }} >Patient ID
-                                                    {/* <SwapVertOutlinedIcon style={{fontSize:'15px'}}/>  */}
-                                                </TableCell>
-                                                <TableCell >Camp Name</TableCell>
+                                                <TableCell>Patient ID</TableCell>
                                                 <TableCell >Patient FullName</TableCell>
                                                 <TableCell >Age</TableCell>
                                                 <TableCell align="left">Gender</TableCell>
+                                                <TableCell align="left">Blood Group</TableCell>
                                                 <TableCell align="left">Contact No</TableCell>
                                                 <TableCell align="left">Email ID</TableCell>
                                                 <TableCell align="left">Address</TableCell>
@@ -232,13 +226,11 @@ function AllPatientRecords() {
                                                                 {row.patientID}
                                                             </TableCell>
                                                             <TableCell component="td" scope="row">
-                                                                {row.campPlanningDet ? row.campPlanningDet.campName : ''}
-                                                            </TableCell>
-                                                            <TableCell component="td" scope="row">
                                                                 {row.patientFullName}
                                                             </TableCell>
                                                             <TableCell align="left">{row.age}</TableCell>
                                                             <TableCell align="left">{row.gender}</TableCell>
+                                                            <TableCell align="left">{row.bloodgroup}</TableCell>
                                                             <TableCell align="left">{row.contactNo}</TableCell>
                                                             <TableCell align="left">{row.emailAddress}</TableCell>
                                                             <TableCell align="left">
@@ -261,21 +253,24 @@ function AllPatientRecords() {
                                                             <TableCell align="left">{row.users.fullName}</TableCell>
 
                                                             <TableCell align="center" className='action-items'>
-                                                                <IconButton className='icon-action'>
-                                                                    <Tooltip title='Edit'>
-                                                                        <ModeEditOutlineOutlined onClick={() => editVolunteerDet(row)} className='icon-action' />
-                                                                    </Tooltip>
-                                                                </IconButton>
+                                                                {userRole === "ROLE_SUPER_ADMIN" || userRole === "ROLE_CAMP_ADMIN" ?
+                                                                    <IconButton className='icon-action'>
+                                                                        <Tooltip title='Edit'>
+                                                                            <ModeEditOutlineOutlined onClick={() => editPatientDet(row)} className='icon-action' />
+                                                                        </Tooltip>
+                                                                    </IconButton>
+                                                                    : ''}
                                                                 <IconButton className='icon-action'>
                                                                     <Tooltip title='View'>
-                                                                        <VisibilityOutlined onClick={() => viewVolunteerDet(row)} className='icon-action' />
+                                                                        <VisibilityOutlined onClick={() => viewPatientDet(row)} className='icon-action' />
                                                                     </Tooltip>
                                                                 </IconButton>
-                                                                <IconButton className='icon-action'>
-                                                                    <Tooltip title='Delete'>
-                                                                        <DeleteOutlineOutlined onClick={() => deleteVolunteer(row)} className='icon-action' />
-                                                                    </Tooltip>
-                                                                </IconButton>
+                                                                {userRole === "ROLE_SUPER_ADMIN" ?
+                                                                    <IconButton className='icon-action'>
+                                                                        <Tooltip title='Delete'>
+                                                                            <DeleteOutlineOutlined onClick={() => deletePatient(row)} className='icon-action' />
+                                                                        </Tooltip>
+                                                                    </IconButton> : ''}
                                                             </TableCell>
 
                                                         </TableRow>
@@ -297,14 +292,17 @@ function AllPatientRecords() {
                             </Paper>
                         </div>
                         {isEditModalOpen && (
-                            <EditPatientDet fetchPatientData={fetchPatientData} campIdD={''}
+                            <EditPatientDet fetchPatientData={fetchPatientData} campIdD={''} patientCampSelection={patientCampSelection}
                                 userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
                         )}
-                        <NotificationContainer />
+                        {deletePop && (
+                            <DeleteCampDet deleteItem={deleteOption} data={selectedData} isDeletePop={deletePop} OnDeletePopClose={() => setDeletePop(false)} userId={userId} fetchData={fetchPatientData} />
+                        )}
                     </section>
                 </div>
             </div>
 
+            <NotificationContainer />
         </>
     );
 }
