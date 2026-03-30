@@ -4,12 +4,11 @@ import React from 'react'
 import { useState } from 'react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-import '../login/login.css';
-import { getApiUrl } from '../../../config';
+import '../login/login.css'
 
 const VerifyMail = ({ userData, isOtpverifyTab, OtpverifyTabClose }) => {
 
-    const apiUrl = getApiUrl();
+    const apiUrl = process.env.REACT_APP_API_URL;
     
     const [click, setClick] = useState(false)
     const [emailID, setEmailID] = useState('');

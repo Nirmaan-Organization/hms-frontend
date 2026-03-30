@@ -29,6 +29,7 @@ import {
   YAxis,
 } from 'recharts';
 import { getApiUrl } from '../../config';
+import donorLogo from '../../images/donor-logo.png';
 
 const CHART_COLORS = ['#2E86DE', '#E67E22', '#27AE60', '#8E44AD', '#C0392B', '#16A085', '#2C3E50', '#F1C40F'];
 const RADIAN = Math.PI / 180;
@@ -326,10 +327,13 @@ export default function Statistics() {
           alignItems={{ xs: 'flex-start', md: 'center' }}
           spacing={2}
         >
-          <Box>
-            <Typography variant="h5" fontWeight={700}>
-              HCC Dashboard
-            </Typography>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <Box
+              component="img"
+              src={donorLogo}
+              alt="Donor logo"
+              sx={{ height: 44, width: 'auto', objectFit: 'contain' }}
+            />
           </Box>
         </Stack>
       </Paper>

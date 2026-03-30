@@ -1,32 +1,19 @@
 import { CancelOutlined } from '@mui/icons-material'
 import { Button, Grid, Modal } from '@mui/material'
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { NotificationManager } from 'react-notifications'
+import { useSelector } from 'react-redux'
 import './editPatient.css'
-import { NotificationContainer, NotificationManager } from 'react-notifications';
 
 
-const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isOpen, onClose }) => {
-
-    // const apiUrl = process.env.NODE_BACKEND_API_URL;
+const EditPatientDet = ({ fetchPatientData, campIdD, patientCampSelection, userID, data, formMode, isOpen, onClose }) => {
 
     const apiUrl = process.env.REACT_APP_API_URL;
-
-    console.log('campIdD', campIdD);
-    const [campDetls, setCampDetls] = useState([])
-    useEffect(() => {
-        fetch(`${apiUrl}/getAllCampNames`)
-            .then(response => response.json())
-            .then(data => {
-                setCampDetls(data)
-            }).catch(err => {
-
-            })
-    }, [])
 
     const [patientFullName, setpatientFullName] = useState(data === null ? '' : data.patientFullName)
     const [age, setage] = useState(data === null ? '' : data.age)
     const [gender, setgender] = useState(data === null ? '' : data.gender)
+    const [bloodgroup, setBloodgroup] = useState(data === null ? '' : data.bloodgroup)
     const [contactNo, setcontactNO] = useState(data === null ? '' : data.contactNo)
     const [emailAddress, setemailID] = useState(data === null ? '' : data.emailAddress)
     const [address, setAddress] = useState(data === null ? '' : data.address)
@@ -47,21 +34,55 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
     const [aboutCampKnown, setaboutCampKnown] = useState(data === null ? '' : data.aboutCampKnown)
     const [otherInfo, setotherInfo] = useState(data === null ? '' : data.otherInfo)
 
-    const [campID, setcampID] = useState(data === null ? campIdD : data.campId)
+    // const usecampID = useSelector(state => state.myReducer.campId)
+
+    const arrCampID =
+        data && Array.isArray(data.campPlanningDets) && data.campPlanningDets.length > 0 && data.campPlanningDets[0].id !== undefined
+            ? data.campPlanningDets[0].id
+            : '';
+
+
+    const [campID, setCampID] = useState(campIdD === '' ? arrCampID : campIdD)
 
     const [campRecord, setcampRecord] = useState('')
 
 
     useEffect(() => {
-        fetch(`${apiUrl}/getOneCamp/${campID}`)
+        if (campID !== '') {
+            try {
+                fetch(`${apiUrl}/getOneCamp/${campID}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        setcampRecord(data.data.campName)
+                    }).catch(err => {
+
+                    })
+            }
+            catch (err) { }
+        }
+    }, [])
+
+    const [bloodList, setBloodList] = useState([])
+    useEffect(() => {
+        fetch(`${apiUrl}/getBloodGroups`)
             .then(response => response.json())
             .then(data => {
-                setcampRecord(data)
+                setBloodList(data)
             }).catch(err => {
 
             })
     }, [])
 
+    const [campDetls, setCampDetls] = useState([])
+    useEffect(() => {
+        fetch(`${apiUrl}/getAllCampNames`)
+            .then(response => response.json())
+            .then(data => {
+                setCampDetls(data)
+            }).catch(err => {
+
+            })
+    }, [])
     const genderRec = [
         { id: 1, name: 'Male' },
         { id: 2, name: 'Female' },
@@ -91,6 +112,7 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
             "patientFullName": patientFullName,
             "age": age,
             "gender": gender,
+            "bloodgroup": bloodgroup,
             "contactNo": contactNo,
             "emailAddress": emailAddress,
             "address": address,
@@ -125,15 +147,19 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
             });
             if (res.ok) {
                 const data = await res.json();
-                await fetchPatientData();
-                NotificationManager.success(data.message)
-                onClose();
+                if (data.status === 'SUCCESS') {
+                    await fetchPatientData();
+                    NotificationManager.success(data.message)
+                    onClose();
+                } else {
+                    NotificationManager.error(data.message)
+                }
             } else {
                 const data = await res.json();
-                NotificationManager.success(data.message)
+                NotificationManager.error(data.message)
             }
         } catch (error) {
-            NotificationManager.success(error.message)
+            NotificationManager.error(error.message)
         }
     }
 
@@ -144,6 +170,7 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
             "patientFullName": patientFullName,
             "age": age,
             "gender": gender,
+            "bloodgroup": bloodgroup,
             "contactNo": contactNo,
             "emailAddress": emailAddress,
             "address": address,
@@ -185,11 +212,11 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
 
                 } else {
                     const data = await res.json();
-                    NotificationManager.success(data.message)
+                    NotificationManager.error(data.message)
                 }
             }
         } catch (error) {
-            NotificationManager.success(error)
+            NotificationManager.error(error)
         }
     }
 
@@ -214,46 +241,48 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
                                                 <div className="form-inner" style={formMode === 'view' ? { display: 'none' } : { display: 'block' }}>
                                                     <h3>{data === null ? 'Add Patient Details' : 'Edit Patient Details'}</h3>
 
-                                                    <form method="put"
-                                                    //  onSubmit={onUpdatePostDetails}
-                                                    >
+                                                    <form method="put">
                                                         <div className='jm-post-job-wrapper mb-40'>
                                                             <hr />
                                                             <Grid container spacing={2} className="row">
-                                                                <Grid item xs={7} className="forms-controfl">
-                                                                    <label>Camp Name</label>
-                                                                    <select className="jm-job-select" disabled={campIdD === '' ? false : true}
-                                                                        value={campID} onChange={(e) => setcampID(e.target.value)}>
-                                                                        <option>Select Camp</option>
-                                                                        {campDetls === undefined ?
-                                                                            <option>Select Camp</option> :
-                                                                            campDetls.map((item) => (
-                                                                                <option key={item.id} value={item.id}>
-                                                                                    {item.campName}
-                                                                                </option>
-                                                                            ))}
-
-                                                                    </select>
-
-                                                                </Grid>
-                                                                <Grid item xs={5} className="forms-controfl">
-                                                                    <label>Patient Name</label>
+                                                                {patientCampSelection === 'MultiCamp' ?
+                                                                    <Grid item xs={12} sm={7} className="forms-controfl">
+                                                                        <label>Camp Name</label>
+                                                                        <select className="jm-job-select" disabled={campIdD === '' ? false : true}
+                                                                            value={campID} onChange={(e) => setCampID(e.target.value)}>
+                                                                            <option>Select Camp</option>
+                                                                            {campDetls === undefined ? <option>Select Camp</option> :
+                                                                                campDetls.map((item) => (
+                                                                                    <option key={item.id} value={item.id}>
+                                                                                        {item.campName}
+                                                                                    </option>
+                                                                                ))}
+                                                                        </select>
+                                                                    </Grid> :
+                                                                    <Grid itemxs={12} sm={7} className="forms-controfl">
+                                                                        <label>Camp Name</label>
+                                                                        <input type="text"
+                                                                            value={campRecord} disabled
+                                                                        />
+                                                                    </Grid>
+                                                                }
+                                                                <Grid item xs={12} sm={4} md={5} className="forms-controfl">
+                                                                    <label className='required-field'>Patient Name</label>
                                                                     <input type="text" placeholder="Patient Name"
                                                                         value={patientFullName}
                                                                         onChange={(e) => setpatientFullName(e.target.value)} required
                                                                     />
 
                                                                 </Grid>
-                                                                <Grid item xs={1.5} className="forms-controfl">
-                                                                    <label>Age</label>
-                                                                    <input type="number"
-                                                                        value={age}
-                                                                        onChange={(e) => setage(e.target.value)}
+                                                                <Grid item xs={12} sm={4} md={2} className="forms-controfl">
+                                                                    <label className='required-field'>Age</label>
+                                                                    <input type="number" value={age}
+                                                                        onChange={(e) => setage(e.target.value)} required
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={2.5} className="forms-controfl">
-                                                                    <label>Gender</label>
-                                                                    <select className="jm-job-select"
+                                                                <Grid item xs={12} sm={4} md={2.5} className="forms-controfl">
+                                                                    <label className='required-field'>Gender</label>
+                                                                    <select className="jm-job-select" required
                                                                         value={gender} onChange={(e) => setgender(e.target.value)}>
                                                                         <option>Select Gender</option>
                                                                         {genderRec === undefined ?
@@ -265,49 +294,63 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
                                                                             ))}
                                                                     </select>
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
-                                                                    <label>Contact NO</label>
-                                                                    <input type="text"
-                                                                        value={contactNo} placeholder="Contact No" required
+                                                                <Grid item xs={12} sm={4} md={2.5} className="forms-controfl">
+                                                                    <label className='required-field'>Blood Group</label>
+                                                                    <select className="jm-job-select" required
+                                                                        value={bloodgroup} onChange={(e) => setBloodgroup(e.target.value)}>
+                                                                        <option>Select Group</option>
+                                                                        {bloodList === undefined ?
+                                                                            <option>Select Group</option> :
+                                                                            bloodList.map((item) => (
+                                                                                <option key={item.id} value={item.bloodGroup}>
+                                                                                    {item.bloodGroup}
+                                                                                </option>
+                                                                            ))}
+                                                                    </select>
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={4} md={5} className="forms-controfl">
+                                                                    <label className='required-field'>Contact NO</label>
+                                                                    <input type="number"
+                                                                        value={contactNo} placeholder="Contact No"
                                                                         onChange={(e) => setcontactNO(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
+                                                                <Grid item xs={12} sm={4} md={4} className=" forms-controfl">
                                                                     <label>Email Address</label>
                                                                     <input type="text" placeholder="Email ID"
                                                                         value={emailAddress}
                                                                         onChange={(e) => setemailID(e.target.value)} required
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
+                                                                <Grid item xs={12} sm={4} md={8} className=" forms-controfl">
                                                                     <label>Address</label>
                                                                     <input type="text" placeholder="Address"
                                                                         value={address}
                                                                         onChange={(e) => setAddress(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={3} className=" forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={3} className=" forms-controfl">
                                                                     <label>City</label>
                                                                     <input type="text" placeholder="City"
                                                                         value={city}
                                                                         onChange={(e) => setcity(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={3} className=" forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={3} className=" forms-controfl">
                                                                     <label>State</label>
                                                                     <input type="text" placeholder="State"
                                                                         value={state}
                                                                         onChange={(e) => setState(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={2} className=" forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={2} className=" forms-controfl">
                                                                     <label>Zip Code</label>
                                                                     <input type="number" placeholder="Zip Code"
                                                                         value={zipCode}
                                                                         onChange={(e) => setzipCode(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className=" forms-controfl">
                                                                     <label>Marital Status</label>
                                                                     <select className="jm-job-select"
                                                                         value={maritalStatus} onChange={(e) => setmaritalStatus(e.target.value)}>
@@ -321,70 +364,70 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
                                                                             ))}
                                                                     </select>
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Occupation</label>
                                                                     <input type="text" placeholder="Occupation"
                                                                         value={occupation}
                                                                         onChange={(e) => setoccupation(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Primary Lang</label>
                                                                     <input type="text" placeholder="Primary Lang"
                                                                         value={primaryLang}
                                                                         onChange={(e) => setprimaryLang(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Existing Medical Cond</label>
                                                                     <input type="text" placeholder="Existing Medical Cond"
                                                                         value={existingMedicalCond}
                                                                         onChange={(e) => setexistingMedicalCond(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Current Medications</label>
                                                                     <input type="text" placeholder="Current Medications"
                                                                         value={currentMedications}
                                                                         onChange={(e) => setcurrentMedications(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Allergies To Medications</label>
                                                                     <input type="text" placeholder="Allergies To Medications"
                                                                         value={allergiesToMedications}
                                                                         onChange={(e) => setallergiesToMedications(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Family Medical History</label>
                                                                     <input type="text" placeholder="Family Medical History"
                                                                         value={familyMedicalHistory}
                                                                         onChange={(e) => setfamilyMedicalHistory(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Reason For Visiting</label>
                                                                     <input type="text" placeholder="Reason For Visiting"
                                                                         value={reasonForVisiting}
                                                                         onChange={(e) => setreasonForVisiting(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Emergency Contact Name</label>
                                                                     <input type="text" placeholder="Emergency Contact Name"
                                                                         value={emergencyContactName}
                                                                         onChange={(e) => setemergencyContactName(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Emergency Contact No</label>
                                                                     <input type="text" placeholder="Emergency Contact No"
                                                                         value={emergencyContactNo}
                                                                         onChange={(e) => setemergencyContactNo(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>Emergency Preson Relationship</label>
                                                                     <select className="jm-job-select"
                                                                         value={emergencyPresonRelationship} onChange={(e) => setemergencyPresonRelationship(e.target.value)}>
@@ -399,7 +442,7 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
 
                                                                     </select>
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={4} className="forms-controfl">
                                                                     <label>About Camp Known</label>
                                                                     <input type="text" placeholder="About Camp Known"
                                                                         value={aboutCampKnown}
@@ -442,141 +485,147 @@ const EditPatientDet = ({ fetchPatientData, campIdD, userID, data, formMode, isO
                                                     <div className='jm-post-job-wrapper mb-40'>
                                                         <hr />
                                                         <Grid container spacing={2} className="row">
-                                                            <Grid item xs={8} className="forms-controfl">
+                                                            <Grid item xs={12} sm={8} className="forms-controfl">
                                                                 <label>Camp Name</label>
                                                                 <input type="text"
-                                                                    value={campRecord.campName} disabled
+                                                                    value={campRecord} disabled
                                                                 />
 
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Patient Name</label>
                                                                 <input type="text"
                                                                     value={patientFullName} disabled
                                                                 />
 
                                                             </Grid>
-                                                            <Grid item xs={2} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={2} className="forms-controfl">
                                                                 <label>Age</label>
-                                                                <input type="number"
+                                                                <input type="text"
                                                                     value={age} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={2} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={2.5} className="forms-controfl">
                                                                 <label>Gender</label>
                                                                 <input type="text"
                                                                     value={gender} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={2.5} className="forms-controfl">
+                                                                <label>Blood Group</label>
+                                                                <input type="text"
+                                                                    value={bloodgroup} disabled
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={4} md={5} className="forms-controfl">
                                                                 <label>Contact NO</label>
                                                                 <input type="text"
                                                                     value={contactNo} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Email ID</label>
                                                                 <input type="text"
                                                                     value={emailAddress} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={8} className=" forms-controfl">
                                                                 <label>Address</label>
                                                                 <input type="text"
                                                                     value={address} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={3} className=" forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={3} className=" forms-controfl">
                                                                 <label>City</label>
                                                                 <input type="text"
                                                                     value={city} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={3} className=" forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={3} className=" forms-controfl">
                                                                 <label>State</label>
                                                                 <input type="text"
                                                                     value={state} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={2} className=" forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={2} className=" forms-controfl">
                                                                 <label>Zip Code</label>
                                                                 <input type="text"
                                                                     value={zipCode} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className=" forms-controfl">
                                                                 <label>Marital Status</label>
                                                                 <input type="text"
                                                                     value={maritalStatus} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Occupation</label>
                                                                 <input type="text"
                                                                     value={occupation} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Primary Lang</label>
                                                                 <input type="text"
                                                                     value={primaryLang} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Existing Medical Cond</label>
                                                                 <input type="text"
                                                                     value={existingMedicalCond} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Current Medications</label>
                                                                 <input type="text"
                                                                     value={currentMedications} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Allergies To Medications</label>
                                                                 <input type="text"
                                                                     value={allergiesToMedications} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Family Medical History</label>
                                                                 <input type="text"
                                                                     value={familyMedicalHistory} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Reason For Visiting</label>
                                                                 <input type="text"
                                                                     value={reasonForVisiting} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Emergency Contact Name</label>
                                                                 <input type="text"
                                                                     value={emergencyContactName} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Emergency Contact No</label>
                                                                 <input type="text"
                                                                     value={emergencyContactNo} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Emergency Person Relationship </label>
                                                                 <input type="text"
                                                                     value={emergencyPresonRelationship} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>About Camp Known</label>
                                                                 <input type="text"
                                                                     value={aboutCampKnown} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={12} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={12} className="forms-controfl">
                                                                 <label>Other Info</label>
                                                                 <input type="text"
                                                                     value={otherInfo} disabled

@@ -1,14 +1,13 @@
-import React from 'react'
-import './settings.css'
+import React from 'react';
+import { NotificationContainer } from 'react-notifications';
+import ProfileScreen from './ProfileScreen';
 
 const Settings = () => {
     return (
         <>
-            <section className='settings-container'>
-                <div className="container">
-                    Settings
-                </div>
-            </section>
+            <ProfileScreen />
+            <NotificationContainer />
+
         </>
     )
 }

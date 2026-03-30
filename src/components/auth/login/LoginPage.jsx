@@ -1,52 +1,46 @@
-import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { IconButton, InputAdornment, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import ForgetPassword from '../forgetPassword/ForgetPassword';
+import CssBaseline from '@mui/material/CssBaseline';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Typography from '@mui/material/Typography';
+import * as React from 'react';
 import { useState } from 'react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import headerLogo from '../../../images/hms-logo.png';
-import { getApiUrl } from '../../../config';
-
+import ForgetPassword from '../forgetPassword/ForgetPassword';
 
 // TODO remove, this demo shouldn't need to reset the theme.
 
-const defaultTheme = createTheme();
 function LoginPage() {
 
-    const apiUrl = getApiUrl();
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const [isForgetModalOpen, setIsForgetModalOpen] = useState(false);
-
     const openForgetModal = async (e) => {
         e.preventDefault();
-
         setIsForgetModalOpen(true);
-
     };
-
     const closeForgetModal = () => {
         setIsForgetModalOpen(false);
     };
 
-    const [email, setEmail] = useState('')
+    const [emailorContactNo, setEmailorContactNo] = useState('')
     const [password, setPassword] = useState('')
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     const handleForms = (e) => {
         const { name, value } = e.target;
-        if (name === 'email') {
-            setEmail(value)
+        if (name === 'emailorContactNo') {
+            setEmailorContactNo(value)
         } else if (name === 'password') {
             setPassword(value)
         }
@@ -55,7 +49,7 @@ function LoginPage() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         let loginData = {
-            "email": email,
+            "emailorContactNo": emailorContactNo,
             "password": password
         }
         try {
@@ -69,9 +63,10 @@ function LoginPage() {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log(data.role,'dilipppp');
                 NotificationManager.success('Login successfully')
                 localStorage.setItem('userData', JSON.stringify(data))
-
+ 
                 window.location = '/dashboard'
             } else {
                 const data = await response.json()
@@ -85,8 +80,8 @@ function LoginPage() {
     //    console.log(localStorage.getItem('userData'));
 
     return (
-        <ThemeProvider theme={defaultTheme}>
-            <Container component="main" maxWidth="xs">
+        <div>
+            <Container>
                 <CssBaseline />
                 <Box
                     sx={{
@@ -96,23 +91,23 @@ function LoginPage() {
                         alignItems: 'center',
                     }}
                 >
-                    <img src={headerLogo} alt="Logo" className='app-logo'/>
+                    <img src={headerLogo} alt="Logo" className='app-logo' />
 
-                    <Typography component="h1" variant="h5">
+                    <Typography component="h1" variant="h5" className='login-headername'>
                         Login
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                        
+
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <TextField
                                     required
                                     fullWidth
                                     id="email"
-                                    label="Email Address"
-                                    name="email"
+                                    label="Email Address or Contact No"
+                                    name="emailorContactNo"
                                     autoComplete="email"
-                                    value={email} onChange={handleForms}
+                                    value={emailorContactNo} onChange={handleForms}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -121,35 +116,51 @@ function LoginPage() {
                                     fullWidth
                                     name="password"
                                     label="Password"
-                                    type="password"
+                                    type={showPassword ? 'text' : 'password'}
                                     id="password"
                                     autoComplete="new-password"
                                     value={password} onChange={handleForms}
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={handleClickShowPassword}
+                                                    edge="end"
+                                                >
+                                                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
                                 />
                             </Grid>
                         </Grid>
-                        {/* <Grid container justifyContent="flex-start">
+                        <Grid container justifyContent="flex-start">
                             <Grid item>
                                 <Link href="/signup" variant="body2" onClick={openForgetModal}>
                                     Forget Password?
                                 </Link>
                             </Grid>
-                        </Grid> */}
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            Sign In
-                        </Button>
+                        </Grid>
                         <Grid container justifyContent="flex-end">
+                            <Button
+                                className='btn-login'
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                sx={{ mt: 3, mb: 2 }}
+                            >
+                                Sign In
+                            </Button>
+                        </Grid>
+                        {/* <Grid container justifyContent="flex-end">
                             <Grid item>
                                 <Link href="/signup" variant="body2">
                                     Create a new account? Sign up
                                 </Link>
                             </Grid>
-                        </Grid>
+                        </Grid> */}
                     </Box>
                 </Box>
 
@@ -157,7 +168,7 @@ function LoginPage() {
             <NotificationContainer />
             <ForgetPassword ispassChangeOpen={isForgetModalOpen} onpasschangeClose={closeForgetModal} />
 
-        </ThemeProvider>
+        </div>
     );
 }
 

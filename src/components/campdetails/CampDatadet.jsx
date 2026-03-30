@@ -1,5 +1,5 @@
-import { AddCircleOutlineOutlined, DeleteOutlineOutlined, GroupAddTwoTone, LocalHospitalTwoTone, ModeEditOutlineOutlined, UploadFileOutlined } from '@mui/icons-material';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import { AddCircleOutlineOutlined, GroupAddTwoTone, LocalHospitalTwoTone } from '@mui/icons-material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { Button, IconButton, TablePagination, Tooltip } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -10,14 +10,16 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import { useDispatch } from 'react-redux';
 import { setCamp, setValue, setactiveStyle } from '../redux/reducer';
 import './campdet.css';
 import EditCampDet from './campForm/EditCampDet';
+import DeleteCampDet from './DeleteCampDet';
+import CustomizedMenus from './MenuOptions/CustomizedMenus';
 import UploadJobDet from './UploadFileDiv/UploadJobDet';
-import { getApiUrl } from '../../config';
+
 
 function CampDatadet() {
 
@@ -36,10 +38,15 @@ function CampDatadet() {
   }
 
 
-  const apiUrl = getApiUrl();
+
+  const masterRole = ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_CAMP_ORGANIZER']
+
+  const apiUrl = process.env.REACT_APP_API_URL;
   const currentUser = localStorage.getItem('userData')
   const userProfile = JSON.parse(currentUser)
+
   const userId = userProfile ? userProfile.id : null;
+  const userRole = userProfile ? userProfile.role : null;
 
   const [activityTypes, setActivtyDetails] = useState([])
 
@@ -76,27 +83,26 @@ function CampDatadet() {
   useEffect(() => {
     fetchData();
   }, []);
-  // useEffect(() => {
-  //   fetch(`${apiUrl}/getAllCampdet`)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       setallCampDet(data)
-  //     }).catch(err => {
-
-  //     })
-  // }, [])
 
   const [searchText, setsearchText] = useState('')
   const [selectType, setselectType] = useState('')
-  const searchCamplists = allcamplists.filter(item =>
-    searchText ? item.campName !== null && item.campName.toLowerCase().includes(searchText.toLowerCase()) : true
-  )
+  const roleacc = ['ROLE_SUPER_ADMIN', 'ROLE_VOLUNTEER']
 
-  const camplists = searchCamplists.filter(item =>
-    selectType ? item.activityType !== null && item.activityType.toLowerCase().includes(selectType.toLowerCase()) : true
-  )
-  // console.log(allcampDet);
-  // const camplists = allcampDet.filter(item =>
+  const camplists = allcamplists.filter(item => {
+    const campNameSearch = searchText ? item.campName !== null && item.campName.toLowerCase().includes(searchText.toLowerCase()) : true
+    const activitySearch = selectType ? item.activityType !== null && item.activityType.toLowerCase().includes(selectType.toLowerCase()) : true
+    const useraccess = roleacc.includes(userRole)
+    const createdaccess = userId ? item.created_by === userId : true
+
+    return campNameSearch && activitySearch && (useraccess || createdaccess)
+  })
+
+  // const camplists = searchCamplists.filter(item =>
+  //   selectType ? item.activityType !== null && item.activityType.toLowerCase().includes(selectType.toLowerCase()) : true
+  //     && userRole === "ROLE_SUPER_ADMIN" ? true : userId ? item.created_by === userId : true
+  // )
+
+  // const userCampDet = camplists.filter(item =>
   //   userId ? item.created_by === userId : true
   // )
 
@@ -137,34 +143,24 @@ function CampDatadet() {
   }
 
 
-  const deleteCampDet = async (row) => {
-    let payload = {
-      "created_by": userId
-    }
+  const [deletePop, setDeletePop] = useState(false);
+  const [deleteOption, setDeleteOption] = useState(false);
 
-    try {
-      const res = await fetch(`${apiUrl}/deleteCamp/${row.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        const data = await res.json();
-        NotificationManager.success(data.message)
-
-      } else {
-        const data = await res.json();
-        NotificationManager.success(data.message)
-      }
-    } catch (error) {
-      NotificationManager.success(error)
-    }
+  const deleteRecord = (row) => {
+    setSelectedData(row);
+    setDeleteOption('Camp')
+    setDeletePop(true);
   }
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const handleClickOpen = () => {
+    setDeletePop(true);
+  };
 
+  const handleClose = () => {
+    setDeletePop(false);
+  };
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => {
     setIsModalOpen(true);
   };
@@ -175,153 +171,147 @@ function CampDatadet() {
 
   return (
     <>
-      <section className='main-container'>
-        <div className="order">
-          <div className="head">
-            <div className="search-filter">
-              <input type="text" placeholder="Search with camp name"
-                onChange={e => setsearchText(e.target.value)}
-                value={searchText}
+      <div className='main-container'>
+        <section>
+          <div className="order">
+            <div className="head">
+              <div className="search-filter">
+                <input type="text" placeholder="Search with camp name"
+                  onChange={e => setsearchText(e.target.value)}
+                  value={searchText}
+                />
+                <select className="search-text"
+                  onChange={e => setselectType(e.target.value)}
+                  value={selectType}>
+                  <option>Select Activity Type</option>
+                  {activityTypes === undefined ?
+                    <option>Select Activity Type</option> :
+                    activityTypes.map((item) => (
+                      <option key={item.id} value={item.activityName}>
+                        {item.activityName}
+                      </option>
+                    ))}
+
+                </select>
+                <Button style={{ height: '20px', fontSize: '10px', width: '25px' }}
+                  variant="contained" color="error" onClick={clearSearch}>
+                  Clear
+                </Button>
+              </div>
+
+              <div className='icon-manage' style={{ display: 'flex', alignItems: 'center' }}>
+                <IconButton className='bx'>
+                  <Tooltip className='bx' title='Camp Details refresh'>
+                    {/* <UploadFileOutlined className='bx' onClick={openModal} /> */}
+                    <RefreshIcon className='bx' onClick={fetchData} />
+                  </Tooltip>
+                </IconButton>
+                {masterRole.includes(userRole) ?
+                  <IconButton className='bx'>
+                    <Tooltip className='bx' title='Add Camp Details'>
+                      <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
+                    </Tooltip>
+                  </IconButton>
+                  : ''}
+              </div>
+
+
+            </div>
+            <Paper className='table-container-camp'>
+              <TableContainer component={Paper} sx={{ maxHeight: 300 }}> 
+                <Table size='small' aria-label="a dense table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell component="th" scope="row">Camp ID</TableCell>
+                      <TableCell >Camp Name</TableCell>
+                      <TableCell align="left">Date&Time</TableCell>
+                      <TableCell align="left">Address</TableCell>
+                      <TableCell align="left">Description</TableCell>
+                      <TableCell align="left">Activity Type</TableCell>
+                      <TableCell align="left">Assoication with </TableCell>
+                      <TableCell align="left">Organizer</TableCell>
+                      <TableCell align="center">Action</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {camplists
+                      .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                      .map((row, index) => {
+                        return (
+                          <TableRow key={row.id}>
+                            <TableCell component="td" scope="row"
+                              // onClick={() => viewRecord(row)} 
+                              className='row-selection'>
+                              <div style={{ display: 'flex', gridGap: '5px', alignItems: 'center' }}>
+                                {row.campID}
+                                {masterRole.includes(userRole) ? <CustomizedMenus data={row} /> : ''}
+                              </div>
+                            </TableCell>
+                            <TableCell component="td" scope="row">
+                              {row.campName}
+                            </TableCell>
+                            <TableCell align="left">{row.campDate} & <br /> {row.startTime} - {row.endTime} </TableCell>
+                            <TableCell align="left">{row.street}, {row.city}
+                              <br /> {row.state} - {row.zipCode}</TableCell>
+                            <TableCell align="left">{row.description}</TableCell>
+                            <TableCell align="left">{row.activityType}{row.otherActivityType !== null ? ' - '.concat(row.otherActivityType) : ''}</TableCell>
+                            <TableCell align="left">{row.timeSlotAllocation}</TableCell>
+                            <TableCell align="left">{row.users.organizationDet.orgName}</TableCell>
+
+                            <TableCell component="td" scope="row" className='action-items'>
+                          
+                              {userRole === 'ROLE_SUPER_ADMIN' || userRole === 'ROLE_ADMIN' || userRole === 'ROLE_HEALTHCARE_PROVIDER' || userRole === 'ROLE_CAMP_ADMIN' || userRole === 'ROLE_VOLUNTEER' ?
+                                <IconButton className='icon-action'>
+                                  <Tooltip title='Patient Det' >
+                                    <LocalHospitalTwoTone
+                                      className='icon-action'
+                                      onClick={() => sidebarChange(row)} />
+                                  </Tooltip>
+                                </IconButton> : ''
+                              }
+                              {userRole !== 'ROLE_HEALTHCARE_PROVIDER' && userRole !== 'ROLE_VOLUNTEER' ?
+                                <IconButton className='icon-action'>
+                                  <Tooltip title='Volunteer Det' >
+                                    <GroupAddTwoTone
+                                      className='icon-action'
+                                      onClick={() => volunteerDisply(row)}
+                                    />
+                                  </Tooltip>
+                                </IconButton>
+                                : ''}
+
+                            </TableCell>
+
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <TablePagination
+                rowsPerPageOptions={[10, 25, 100]}
+                component="div"
+
+                count={camplists === undefined ? null : camplists.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
               />
-              <select className="search-text"
-                onChange={e => setselectType(e.target.value)}
-                value={selectType}>
-                <option>Select Activity Type</option>
-                {activityTypes === undefined ?
-                  <option>Select Activity Type</option> :
-                  activityTypes.map((item) => (
-                    <option key={item.id} value={item.activityName}>
-                      {item.activityName}
-                    </option>
-                  ))}
-
-              </select>
-              <Button style={{ height: '20px', fontSize: '10px', width: '25px' }}
-                variant="contained" color="error" onClick={clearSearch}>
-                Clear
-              </Button>
-            </div>
-  
-            <div className='icon-manage' style={{ display: 'flex', alignItems: 'center' }}>
-              <IconButton className='bx'>
-                <Tooltip className='bx' title='Bulk Upload'>
-                  <UploadFileOutlined className='bx' onClick={openModal} />
-                </Tooltip>
-              </IconButton>
-
-              <IconButton className='bx'>
-                <Tooltip className='bx' title='Add Camp Details'>
-                  <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
-                </Tooltip>
-              </IconButton>
-            </div>
-
-
+            </Paper>
           </div>
-          <Paper className='table-container'>
-            <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
-              <Table size='small' aria-label="a dense table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Camp ID</TableCell>
-                    <TableCell >Camp Name</TableCell>
-                    <TableCell align="left">Date&Time</TableCell>
-                    <TableCell align="left">Location</TableCell>
-                    <TableCell align="left">Description</TableCell>
-                    <TableCell align="left">Activity Type</TableCell>
-                    <TableCell align="left">Time Slot </TableCell>
-                    <TableCell align="left">Organizer</TableCell>
-                    <TableCell align="center">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {camplists
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row, index) => {
-                      return (
-                        <TableRow key={row.id}>
-                          <TableCell component="td" scope="row"
-                            onClick={() => viewRecord(row)} className='row-selection'>
-                            <div style={{ display: 'flex', gridGap: '5px', alignItems: 'center' }}>
-                              {row.campID}
-                              <MoreHorizIcon />
-                            </div>
-                          </TableCell>
-                          <TableCell component="td" scope="row">
-                            {row.campName}
-                          </TableCell>
-                          <TableCell align="left">{row.campDate} & <br /> {row.startTime} - {row.endTime} </TableCell>
-                          <TableCell align="left">{row.location}</TableCell>
-                          <TableCell align="left">{row.description}</TableCell>
-                          <TableCell align="left">{row.activityType}</TableCell>
-                          <TableCell align="left">{row.timeSlotAllocation}</TableCell>
-                          <TableCell align="left">{row.organizerID === 1 ? 'Nirmaan Orgn' : ''}</TableCell>
+          <UploadJobDet modelType='CampUpload' fetchData={fetchData} isOpen={isModalOpen} onClose={closeModal} />
 
-                          <TableCell component="td" scope="row" className='action-items'>
-                            <IconButton className='icon-action'>
-                              <Tooltip title='Edit'>
-                                <ModeEditOutlineOutlined onClick={() => editRecord(row)} className='icon-action' />
-                              </Tooltip>
-                            </IconButton>
-                            {/* <IconButton className='icon-action'>
-                              <Tooltip title='View'>
-                                <VisibilityOutlined onClick={() => viewRecord(row)} className='icon-action' />
-                              </Tooltip>
-                            </IconButton> */}
-                            <IconButton className='icon-action'>
-                              <Tooltip title='Delete'>
-                                <DeleteOutlineOutlined onClick={() => deleteCampDet(row)} className='icon-action' />
-                              </Tooltip>
-                            </IconButton>
-                            {/* <IconButton className='icon-action'>
-                              <Tooltip title='Volunteer Det'>
-                                <AddBoxOutlined />
-                              </Tooltip>
-                            </IconButton> */}
-                            <IconButton className='icon-action'>
-                              <Tooltip title='Patient Det' >
-                                <LocalHospitalTwoTone
-                                  className='icon-action'
-                                  onClick={() => sidebarChange(row)} />
-                              </Tooltip>
-                            </IconButton>
-                            <IconButton className='icon-action'>
-                              <Tooltip title='Volunteer Det' >
-                                <GroupAddTwoTone
-                                  className='icon-action'
-                                  onClick={() => volunteerDisply(row)}
-                                />
-                              </Tooltip>
-                            </IconButton>
-                          </TableCell>
-
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <TablePagination
-              rowsPerPageOptions={[10, 25, 100]}
-              component="div"
-
-              count={camplists === undefined ? null : camplists.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </Paper>
-        </div>
-        <UploadJobDet modelType='CampUpload' fetchData={fetchData} isOpen={isModalOpen} onClose={closeModal} />
-
-        {isEditModalOpen && (
-          <EditCampDet fetchData={fetchData} userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
-        )}
+          {isEditModalOpen && (
+            <EditCampDet fetchData={fetchData} userData={userProfile} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
+          )}
+          {deletePop && (
+            <DeleteCampDet deleteItem={deleteOption} data={selectedData} isDeletePop={deletePop} OnDeletePopClose={() => setDeletePop(false)} userId={userId} fetchData={fetchData} />
+          )}
+        </section >
         <NotificationContainer />
-      </section >
 
-
+      </div>
     </>
   );
 }
