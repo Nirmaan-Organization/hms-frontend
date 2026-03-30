@@ -63,6 +63,7 @@ function LoginPage() {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log(data.role,'dilipppp');
                 NotificationManager.success('Login successfully')
                 localStorage.setItem('userData', JSON.stringify(data))
  

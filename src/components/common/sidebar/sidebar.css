@@ -12,7 +12,9 @@
 
 .form-input .img-logo {
     width: 170px;
-    height: 50px;
+    max-height: 50px;
+    height: auto;
+    object-fit: contain;
 }
 
 .form-input .img-icon,

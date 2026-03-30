@@ -1,11 +1,13 @@
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import CampDet from '../../campdetails/CampDet';
 import Dashboard from '../../dashboard/Dashboard';
+import HealthFormPage from '../../healthForm/page';
+import HCCRecords from '../../healthForm/HCCRecords';
+import Statistics from '../../healthForm/Statistics';
 import AllPatientRecords from '../../patientDetls/AllPatientRecords';
 import PatientDet from '../../patientDetls/PatientDet';
-import PatientRecords from '../../patientDetls/PatientRecords';
 import Settings from '../../settings/Settings';
 import AllVolunteerRecords from '../../volunteerDet/AllVolunteerRecords';
 import VolunteerDet from '../../volunteerDet/VolunteerDet';
@@ -13,12 +15,13 @@ import Sidebar from '../sidebar/Sidebar';
 import AccountMenu from './AccountMenu';
 import './appbar.css';
 import UserDet from '../../userdetails/UserDet';
+import { isHccAdmin, isHccDataEntry, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
+import { setactiveStyle, setValue } from '../../redux/reducer';
 
 const Appbar = () => {
 
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
-    const name = userProfile ? userProfile.fullName : null;
     const userRole = userProfile.role;
     const masterRole = ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']
 
@@ -29,12 +32,30 @@ const Appbar = () => {
     }
 
 
+    const dispatch = useDispatch();
     const value = useSelector(state => state.myReducer.value)
-    const actStyle = useSelector(state => state.myReducer.activeStyle)
-    const sideMenu = value === '' ? masterRole.includes(userRole) ? 1 : 2 : value;
 
+    const canSeeHcc = isSuperAdmin() || isHccRole() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY';
+    const canSeeHccStats = isSuperAdmin() || isHccAdmin() || userRole === 'ROLE_HCC_ADMIN';
+    const canSeeHccRecords = canSeeHcc;
+    const canSeeHccEntry = isSuperAdmin() || isHccAdmin() || isHccDataEntry() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY';
 
+    const isMaster = masterRole.includes(userRole);
+    const isHccUser = userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || isHccRole();
 
+    // Default landing page after login:
+    // - HCC Admin / HCC Data Entry: HCC Data Entry (id 90)
+    // - Master roles: Dashboard (id 1)
+    // - Others: Camp Management (id 2)
+    useEffect(() => {
+        if (value !== '') return;
+
+        const defaultId = isHccUser ? 90 : (isMaster ? 1 : 2);
+        dispatch(setValue(defaultId));
+        dispatch(setactiveStyle(defaultId));
+    }, [dispatch, isHccUser, isMaster, value]);
+
+    const sideMenu = value === '' ? (isHccUser ? 90 : (isMaster ? 1 : 2)) : value;
 
     return (
         <>
@@ -69,6 +90,9 @@ const Appbar = () => {
                 {sideMenu === 6 && <AllVolunteerRecords />}
                 {sideMenu === 8 && <Settings />}
                 {sideMenu === 9 && <UserDet />}
+                {sideMenu === 90 && (canSeeHccEntry ? <HealthFormPage /> : <Dashboard />)}
+                {sideMenu === 91 && (canSeeHccRecords ? <HCCRecords /> : <Dashboard />)}
+                {sideMenu === 92 && (canSeeHccStats ? <Statistics /> : <Dashboard />)}
             </div>
         </>
     )

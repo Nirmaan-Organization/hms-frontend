@@ -4,6 +4,10 @@
     position: fixed;
     left: 250px;
     transition: .3s ease;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #hide~.container-main {

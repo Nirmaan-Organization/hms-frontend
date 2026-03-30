@@ -380,6 +380,27 @@ export default function HealthFormPage() {
               </TextField>
             </Grid>
 
+            <Grid item xs={12} sm={6}>
+              <TextField
+                select
+                fullWidth
+                label="Type of Illness"
+                name="illnessType"
+                value={formData.illnessType}
+                onChange={handleChange}
+                required
+              >
+                <MenuItem value="">
+                  <em>Select illness type</em>
+                </MenuItem>
+                {illnessTypes.map((type) => (
+                  <MenuItem key={type.value} value={type.value}>
+                    {type.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
             {/* Vitals */}
             <Grid item xs={12} sm={3}>
               <TextField
@@ -460,27 +481,6 @@ export default function HealthFormPage() {
                 error={Boolean(fieldErrors.oxygenSaturation)}
                 helperText={fieldErrors.oxygenSaturation}
               />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                select
-                fullWidth
-                label="Type of Illness"
-                name="illnessType"
-                value={formData.illnessType}
-                onChange={handleChange}
-                required
-              >
-                <MenuItem value="">
-                  <em>Select illness type</em>
-                </MenuItem>
-                {illnessTypes.map((type) => (
-                  <MenuItem key={type.value} value={type.value}>
-                    {type.label}
-                  </MenuItem>
-                ))}
-              </TextField>
             </Grid>
 
             <Grid item xs={12}>

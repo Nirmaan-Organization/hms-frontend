@@ -8,7 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import DeleteCampDet from '../campdetails/DeleteCampDet';
@@ -30,35 +30,44 @@ function AllVolunteerRecords() {
         fetch(`${apiUrl}/getAllRoles`)
             .then(response => response.json())
             .then(data => {
-                setPreferredRoles(data)
+                const roles =
+                    Array.isArray(data) ? data
+                        : Array.isArray(data?.data) ? data.data
+                            : Array.isArray(data?.rows) ? data.rows
+                                : [];
+                setPreferredRoles(roles)
             }).catch(err => {
 
             })
-    }, [])
+    }, [apiUrl])
 
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const [allVolunteers, setallVolunteer] = useState([])
 
-    const fetchVoluntrData = async () => {
+    const fetchVoluntrData = useCallback(async () => {
         try {
             const res = await fetch(`${apiUrl}/getVolunteerDet`);
             const result = await res.json()
             if (result.status === 'FAILED') {
-
+                setallVolunteer([]);
             } else {
-                setallVolunteer(result)
-
+                const volunteers =
+                    Array.isArray(result) ? result
+                        : Array.isArray(result?.data) ? result.data
+                            : Array.isArray(result?.rows) ? result.rows
+                                : [];
+                setallVolunteer(volunteers)
             }
         } catch (err) {
             console.log('Error fetching data', err);
         }
-    }
+    }, [apiUrl]);
 
     useEffect(() => {
         fetchVoluntrData();
-    }, []);
+    }, [fetchVoluntrData]);
 
 
     const [searchText, setsearchText] = useState('')
@@ -67,7 +76,8 @@ function AllVolunteerRecords() {
 
 
 
-    const searchVolntrlists = allVolunteers.filter(item =>
+    const volunteerArray = Array.isArray(allVolunteers) ? allVolunteers : [];
+    const searchVolntrlists = volunteerArray.filter(item =>
         searchText ? item.volunteerName !== null && item.volunteerName.toLowerCase().includes(searchText.toLowerCase()) : true
     )
 

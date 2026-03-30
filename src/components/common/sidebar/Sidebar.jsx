@@ -1,9 +1,11 @@
-import { DashboardCustomizeOutlined, GroupAddTwoTone, Inventory2Outlined, LocalHospitalTwoTone, LogoutOutlined, SettingsApplicationsOutlined, VerifiedUserOutlined } from '@mui/icons-material';
+import { DashboardCustomizeOutlined, GroupAddTwoTone, LocalHospitalTwoTone, LogoutOutlined, QueryStatsOutlined, SettingsApplicationsOutlined, VerifiedUserOutlined } from '@mui/icons-material';
 import HolidayVillageOutlinedIcon from '@mui/icons-material/HolidayVillageOutlined';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import headerIcon from '../../../images/hms-icon.png';
 import headerLogo from '../../../images/hms-logo.png';
+import { isHccAdmin, isHccDataEntry, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
 import { setValue } from '../../redux/reducer';
 import './sidebar.css';
  
@@ -14,15 +16,40 @@ const Sidebar = ({ hideStyle, userData }) => {
   const masterRole = ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']
   const specifyRole = ['ROLE_HEALTHCARE_PROVIDER']
 
+  const isSuper = userRole === 'ROLE_SUPER_ADMIN' || isSuperAdmin();
+  const isHccAdminRole = userRole === 'ROLE_HCC_ADMIN' || isHccAdmin();
+  const isHccDataEntryRole = userRole === 'ROLE_HCC_DATA_ENTRY' || isHccDataEntry();
+  const isAnyHccRole = isHccAdminRole || isHccDataEntryRole || isHccRole();
 
-  const sidebarIcons = [
+  const hccMenuItems = [
+    { id: 90, menuItem: 'HCC Data Entry', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '#' },
+    { id: 91, menuItem: 'HCC Records', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '#' },
+  ];
+
+  const hccDashboardItem = { id: 92, menuItem: 'HCC Dashboard', iconImg: <QueryStatsOutlined className='bx' />, menuLink: '#' };
+
+  const baseSidebarIcons = [
     masterRole.includes(userRole) ? { id: 1, menuItem: 'Dashboard', iconImg: <DashboardCustomizeOutlined className='bx' />, menuLink: '#' } : '',
     { id: 2, menuItem: 'Camp Management', iconImg: <HolidayVillageOutlinedIcon className='bx' />, menuLink: '#' },
     masterRole.includes(userRole) || specifyRole.includes(userRole) ? { id: 4, menuItem: 'Patient Information', iconImg: <LocalHospitalTwoTone className='bx' />, menuLink: '#' } : '',
     masterRole.includes(userRole) ? { id: 6, menuItem: 'All Volunteer Details', iconImg: <GroupAddTwoTone className='bx' />, menuLink: '#' } : '',
-    // userRole === 'ROLE_SUPER_ADMIN' || userRole === 'ROLE_ADMIN' ? { id: 7, menuItem: 'Inventory Management', iconImg: <Inventory2Outlined className='bx' />, menuLink: '#' } : '',
-    userRole === 'ROLE_SUPER_ADMIN' ? { id: 9, menuItem: 'User Management', iconImg: <VerifiedUserOutlined className='bx' />, menuLink: '#' } : ''
-  ]
+    isSuper ? { id: 9, menuItem: 'User Management', iconImg: <VerifiedUserOutlined className='bx' />, menuLink: '#' } : ''
+  ];
+
+  // Visibility rules requested:
+  // - HCC admin: only HCC Data Entry, HCC Records, HCC Dashboard
+  // - HCC data entry: only HCC Data Entry, HCC Records
+  // - Super admin: sees everything + all HCC items
+  let sidebarIcons = baseSidebarIcons;
+  if (!isSuper && isAnyHccRole) {
+    sidebarIcons = isHccAdminRole ? [...hccMenuItems, hccDashboardItem] : [...hccMenuItems];
+  } else if (isSuper) {
+    sidebarIcons = [
+      ...baseSidebarIcons,
+      ...hccMenuItems,
+      hccDashboardItem,
+    ];
+  }
 
   const commonSidebar = [
     {

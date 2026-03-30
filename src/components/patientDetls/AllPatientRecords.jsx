@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { AddCircleOutlineOutlined } from '@mui/icons-material';
-import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 import './patientDet.css';
 import EditPatientDet from './PatientForm/EditPatientDet';
@@ -38,11 +38,16 @@ function AllPatientRecords() {
         fetch(`${apiUrl}/getAllCampNames`)
             .then(response => response.json())
             .then(data => {
-                setCampDetls(data)
+                const camps =
+                    Array.isArray(data) ? data
+                        : Array.isArray(data?.data) ? data.data
+                            : Array.isArray(data?.rows) ? data.rows
+                                : [];
+                setCampDetls(camps)
             }).catch(err => {
 
             })
-    }, [])
+    }, [apiUrl])
     const [allPatientRecords, setAllPatientRecords] = useState([])
 
     const [selectCamp, setselectCamp] = useState(campIdD === '' ? null : campIdD)
@@ -52,11 +57,16 @@ function AllPatientRecords() {
         fetch(`${apiUrl}/getBloodGroups`)
             .then(response => response.json())
             .then(data => {
-                setBloodList(data)
+                const bloodGroups =
+                    Array.isArray(data) ? data
+                        : Array.isArray(data?.data) ? data.data
+                            : Array.isArray(data?.rows) ? data.rows
+                                : [];
+                setBloodList(bloodGroups)
             }).catch(err => {
 
             })
-    }, [])
+    }, [apiUrl])
 
     const fetchPatientData = async () => {
 
@@ -66,7 +76,12 @@ function AllPatientRecords() {
 
             if (result.status === 'FAILED') {
             } else {
-                setAllPatientRecords(result)
+                const patients =
+                    Array.isArray(result) ? result
+                        : Array.isArray(result?.data) ? result.data
+                            : Array.isArray(result?.rows) ? result.rows
+                                : [];
+                setAllPatientRecords(patients)
             }
 
         } catch (err) {
@@ -76,17 +91,28 @@ function AllPatientRecords() {
 
     useEffect(() => {
         fetchPatientData();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [apiUrl]);
 
     const [searchText, setsearchText] = useState('')
     const [searchBlood, setBloodName] = useState('')
 
-    const searchWthBlood = allPatientRecords.filter(item =>
-        searchText ? item.patientFullName !== null && item.patientFullName.toLowerCase().includes(searchText.toLowerCase())
-            || item.patientID !== null && item.patientID.includes(searchText)
-            || item.contactNo !== null && item.contactNo.includes(searchText) : true
-                && userRole === "ROLE_SUPER_ADMIN" ? true : userId ? item.created_by === userId : true
-    )
+    const patientArray = Array.isArray(allPatientRecords) ? allPatientRecords : [];
+    const searchWthBlood = patientArray.filter((item) => {
+        const matchesText = searchText
+            ? (
+                (item.patientFullName !== null && item.patientFullName?.toLowerCase().includes(searchText.toLowerCase())) ||
+                (item.patientID !== null && item.patientID?.includes(searchText)) ||
+                (item.contactNo !== null && item.contactNo?.includes(searchText))
+            )
+            : true;
+
+        const isSuperAdmin = userRole === "ROLE_SUPER_ADMIN";
+        const createdByMatches = userId ? item.created_by === userId : true;
+        const canSeeRow = isSuperAdmin || createdByMatches;
+
+        return matchesText && canSeeRow;
+    })
     const searchVolntrlists = searchWthBlood.filter(item =>
         searchBlood ? item.bloodgroup !== null && item.bloodgroup.toLowerCase().includes(searchBlood.toLowerCase())
             : true
