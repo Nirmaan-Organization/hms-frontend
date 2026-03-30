@@ -3,3 +3,6 @@
 package-lock.json
 .env
 .env.*
+
+# React production build output
+/build

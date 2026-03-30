@@ -49,7 +49,9 @@ function LoginPage() {
     const handleSubmit = async (event) => {
         event.preventDefault();
         let loginData = {
+            // Send both keys for backward/forward compatibility with deployed APIs
             "emailorContactNo": emailorContactNo,
+            "email": emailorContactNo,
             "password": password
         }
         try {
