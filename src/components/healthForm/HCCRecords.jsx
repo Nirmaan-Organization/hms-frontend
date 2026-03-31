@@ -492,44 +492,78 @@ const HCCRecords = () => {
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell>School Name</TableCell>
-                <TableCell>Student Name</TableCell>
-                <TableCell>Student ID</TableCell>
-                <TableCell>Class</TableCell>
-                <TableCell>School Type</TableCell>
                 <TableCell>District</TableCell>
-                <TableCell>Illness Type</TableCell>
+                <TableCell>School Name</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>School Type</TableCell>
+                <TableCell sx={{ minWidth: 170 }}>Student Name</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Class</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Illness Type</TableCell>
                 <TableCell>Illness Details</TableCell>
+                <TableCell sx={{ whiteSpace: 'nowrap' }}>Date of Record</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {pagedRecords.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell>{row.schoolName}</TableCell>
-                  <TableCell>{row.studentName}</TableCell>
-                  <TableCell>{row.studentId}</TableCell>
-                  <TableCell>{row.studentClass}</TableCell>
-                  <TableCell>{row.schoolType}</TableCell>
                   <TableCell>{row.district}</TableCell>
-                  <TableCell>{row.illnessType}</TableCell>
+                  <TableCell>{row.schoolName}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.schoolType}</TableCell>
+                  <TableCell>
+                    <Box sx={{ lineHeight: 1.2 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {row.studentName}
+                      </Typography>
+                      {row.studentId ? (
+                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                          ({row.studentId})
+                        </Typography>
+                      ) : null}
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.studentClass}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.illnessType}</TableCell>
                   <TableCell>{row.illness}</TableCell>
-                  <TableCell>{row.healthDate}</TableCell>
-                  <TableCell align="center">
-                    <Button
-                      size="small"
-                      onClick={() => openVitals(row)}
-                      sx={{ mr: 1 }}
+                  <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.healthDate}</TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      minWidth: 220,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 0.75,
+                      }}
                     >
-                      View Vitals
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => openFollowUp(row)}
-                    >
-                      Follow-up
-                    </Button>
+                      <Button
+                        size="small"
+                        onClick={() => openVitals(row)}
+                        fullWidth
+                        sx={{
+                          minWidth: 190,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        View Vitals & Reports
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => openFollowUp(row)}
+                        fullWidth
+                        sx={{
+                          minWidth: 190,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Follow-up
+                      </Button>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
@@ -658,29 +692,50 @@ const HCCRecords = () => {
                     <TableCell>BP (mmHg)</TableCell>
                     <TableCell>Pulse (BPM)</TableCell>
                     <TableCell>Oxygen Sat (%)</TableCell>
+                    <TableCell>Report</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {vitalsHistory.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} align="center">
+                      <TableCell colSpan={6} align="center">
                         No vitals recorded yet.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    vitalsHistory.map((v) => (
-                      <TableRow key={v.id}>
-                        <TableCell>
-                          {v.recordedAt
-                            ? new Date(v.recordedAt).toLocaleString()
-                            : ''}
-                        </TableCell>
-                        <TableCell>{v.temperatureF}</TableCell>
-                        <TableCell>{v.bloodPressure}</TableCell>
-                        <TableCell>{v.pulseBpm}</TableCell>
-                        <TableCell>{v.oxygenSaturation}</TableCell>
-                      </TableRow>
-                    ))
+                    vitalsHistory.map((v) => {
+                      const reportLink =
+                        v.reportUrl ||
+                        (v.reportPath ? `${apiUrl}/uploads/${v.reportPath}` : null);
+
+                      return (
+                        <TableRow key={v.id}>
+                          <TableCell>
+                            {v.recordedAt
+                              ? new Date(v.recordedAt).toLocaleString()
+                              : ''}
+                          </TableCell>
+                          <TableCell>{v.temperatureF}</TableCell>
+                          <TableCell>{v.bloodPressure}</TableCell>
+                          <TableCell>{v.pulseBpm}</TableCell>
+                          <TableCell>{v.oxygenSaturation}</TableCell>
+                          <TableCell>
+                            {reportLink ? (
+                              <Button
+                                size="small"
+                                href={reportLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                View
+                              </Button>
+                            ) : (
+                              ''
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>

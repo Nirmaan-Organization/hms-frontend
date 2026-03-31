@@ -13,6 +13,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
+import './register.css';
 import VerifyMail from './VerifyMail';
 import headerLogo from '../../../images/hms-logo.png'
 

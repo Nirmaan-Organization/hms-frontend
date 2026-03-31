@@ -76,8 +76,12 @@
 }
 
 .app-logo {
-    width: 300px;
-    height: 100px;
+    display: block;
+    max-width: min(300px, 90vw);
+    max-height: 100px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
 
 

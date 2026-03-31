@@ -12,6 +12,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
+import './login.css';
 import headerLogo from '../../../images/hms-logo.png';
 import ForgetPassword from '../forgetPassword/ForgetPassword';
 
@@ -93,9 +94,18 @@ function LoginPage() {
                         alignItems: 'center',
                     }}
                 >
-                    <img src={headerLogo} alt="Logo" className='app-logo' />
+                    <img src={headerLogo} alt="" className="app-logo" />
 
-                    <Typography component="h1" variant="h5" className='login-headername'>
+                    <Typography
+                        component="h1"
+                        variant="h5"
+                        className="login-headername"
+                        sx={{ mt: 2, mb: 0.5, textAlign: 'center', fontWeight: 600, maxWidth: 420 }}
+                    >
+                        Nirmaan Health Management System
+                    </Typography>
+
+                    <Typography component="h2" variant="h6" className="login-headername" sx={{ mb: 1, textAlign: 'center', color: 'text.secondary', fontWeight: 500 }}>
                         Login
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
