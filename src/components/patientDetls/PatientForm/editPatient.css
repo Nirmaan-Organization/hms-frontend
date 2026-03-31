@@ -48,7 +48,7 @@ input[type=time],
     height: 40px;
     line-height: 40px;
     margin-bottom: 15px;
-    border: 1px solid #e0dfdf;
+    border: 1px solid #998c8c;
     border-radius: 5px;
     padding: 0 20px;
     font-size: 11px;
@@ -153,7 +153,7 @@ input[type=time],
     font-size: 24px;
     line-height: 33px;
     color: #202124;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
 }
 
 .form-df {
@@ -372,8 +372,11 @@ p {
 }
 
 
-@media (min-width: 576px) {
+@media (max-width: 576px) {
 
+    .editjob-editjobmodal {
+        margin: 50px 10px !important;
+    }
 
     .editjobmodal-dialog {
         margin-right: auto;

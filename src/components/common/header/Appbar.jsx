@@ -1,24 +1,29 @@
-import React, { useEffect, useState } from 'react'
-import './appbar.css'
-import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import avatar from '../../../images/userprofile.png'
-import Sidebar from '../sidebar/Sidebar';
-import Dashboard from '../../dashboard/Dashboard';
-import { useLocation } from 'react-router-dom/cjs/react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import CampDet from '../../campdetails/CampDet';
-import { useSelector } from 'react-redux';
-import VolunteerDet from '../../volunteerDet/VolunteerDet';
-import Settings from '../../settings/Settings';
-import AccountMenu from './AccountMenu';
-import headerLogo from '../../../images/hms-logo.png'
-import PatientDet from '../../patientDetls/PatientDet';
-import AllPatientRecords from '../../patientDetls/AllPatientRecords';
-import AllVolunteerRecords from '../../volunteerDet/AllVolunteerRecords';
+import Dashboard from '../../dashboard/Dashboard';
 import HealthFormPage from '../../healthForm/page';
 import HCCRecords from '../../healthForm/HCCRecords';
+import Statistics from '../../healthForm/Statistics';
+import AllPatientRecords from '../../patientDetls/AllPatientRecords';
+import PatientDet from '../../patientDetls/PatientDet';
+import Settings from '../../settings/Settings';
+import AllVolunteerRecords from '../../volunteerDet/AllVolunteerRecords';
+import VolunteerDet from '../../volunteerDet/VolunteerDet';
+import Sidebar from '../sidebar/Sidebar';
+import AccountMenu from './AccountMenu';
+import './appbar.css';
+import UserDet from '../../userdetails/UserDet';
+import { isHccAdmin, isHccDataEntry, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
+import { setactiveStyle, setValue } from '../../redux/reducer';
 
 const Appbar = () => {
+
+    const currentUser = localStorage.getItem('userData')
+    const userProfile = JSON.parse(currentUser)
+    const userRole = userProfile.role;
+    const masterRole = ['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']
 
     const [hideSidebar, sethideSidebar] = useState('')
 
@@ -26,18 +31,35 @@ const Appbar = () => {
         sethideSidebar(e);
     }
 
+
+    const dispatch = useDispatch();
     const value = useSelector(state => state.myReducer.value)
-    const actStyle = useSelector(state => state.myReducer.activeStyle)
-    const sideMenu = value == '' ? 1 : value;
 
+    const canSeeHcc = isSuperAdmin() || isHccRole() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY';
+    const canSeeHccStats = isSuperAdmin() || isHccAdmin() || userRole === 'ROLE_HCC_ADMIN';
+    const canSeeHccRecords = canSeeHcc;
+    const canSeeHccEntry = isSuperAdmin() || isHccAdmin() || isHccDataEntry() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY';
 
-    const currentUser = localStorage.getItem('userData')
-    const userProfile = JSON.parse(currentUser)
-    const name = userProfile ? userProfile.fullName : null;
+    const isMaster = masterRole.includes(userRole);
+    const isHccUser = userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || isHccRole();
+
+    // Default landing page after login:
+    // - HCC Admin / HCC Data Entry: HCC Data Entry (id 90)
+    // - Master roles: Dashboard (id 1)
+    // - Others: Camp Management (id 2)
+    useEffect(() => {
+        if (value !== '') return;
+
+        const defaultId = isHccUser ? 90 : (isMaster ? 1 : 2);
+        dispatch(setValue(defaultId));
+        dispatch(setactiveStyle(defaultId));
+    }, [dispatch, isHccUser, isMaster, value]);
+
+    const sideMenu = value === '' ? (isHccUser ? 90 : (isMaster ? 1 : 2)) : value;
 
     return (
         <>
-            <Sidebar hideStyle={hideSidebar} />
+            <Sidebar hideStyle={hideSidebar} userData={userProfile} />
             <div className='container-main' id={hideSidebar}>
                 <section className='content'>
                     <div>
@@ -51,16 +73,10 @@ const Appbar = () => {
                             }
                             <div className="form-input">
                                 {/* <img src={headerLogo} alt="Logo" /> */}
-                                {/* <a href='#' className='nav-link'>Health Camp Org</a> */}
+                                {/* <h4  className='nav-link'>Health Management System</h4> */}
                             </div>
                             <div className="header-profile">
                                 <AccountMenu />
-                                {/* <div className="header-name">
-                                    <p>Hi, {name.slice(name.lastIndexOf(' ') + 1)}</p>
-                                </div>
-                                <a href='#' className='profile'>
-                                    <img src={avatar} alt="" />
-                                </a> */}
                             </div>
 
                         </nav>
@@ -68,13 +84,15 @@ const Appbar = () => {
                 </section>
                 {sideMenu === 1 && <Dashboard />}
                 {sideMenu === 2 && <CampDet />}
-                {sideMenu === 3 && <PatientDet />}
+                {sideMenu === 3 && <PatientDet />} 
                 {sideMenu === 4 && <AllPatientRecords />}
                 {sideMenu === 5 && <VolunteerDet />}
                 {sideMenu === 6 && <AllVolunteerRecords />}
                 {sideMenu === 8 && <Settings />}
-                {sideMenu === 9 && <HealthFormPage />}
-                {sideMenu === 10 && <HCCRecords />}
+                {sideMenu === 9 && <UserDet />}
+                {sideMenu === 90 && (canSeeHccEntry ? <HealthFormPage /> : <Dashboard />)}
+                {sideMenu === 91 && (canSeeHccRecords ? <HCCRecords /> : <Dashboard />)}
+                {sideMenu === 92 && (canSeeHccStats ? <Statistics /> : <Dashboard />)}
             </div>
         </>
     )

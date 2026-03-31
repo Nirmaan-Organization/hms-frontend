@@ -1,3 +1,52 @@
+.login-main-container {
+    background: #ffffff url('../../../images/banner.jpg') no-repeat right top;
+    background-size: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100vh;
+    padding-top: 5%;
+    padding-right: 50px;
+    color: #fff;
+}
+
+.login-main-container .login-container {
+    width: 40%;
+    height: 65%;
+    margin-right: auto;
+    color: var(--bs-modal-color);
+    pointer-events: auto;
+    background-color: #d8d5d5;
+    background-clip: padding-box;
+    box-shadow: 0 6px 15px rgba(64, 79, 104, .05);
+    border-radius: 8px;
+}
+
+.input-label{
+    margin-top: 3px;
+}
+.bootstrap-input{
+    border-radius: 4px;
+    position: relative;
+    background-color: #F3F6F9;
+    border: 1px solid #E0E3E7;
+    font-size: 16px;
+    width: auto;
+    padding: 10px 12px;
+    transition: all;
+
+}
+
+.login-headername {
+    color: #000000;
+}
+
+.btn-login {
+    max-width: 150px;
+}
+
 .modal.fade .modal-dialog {
     transition: transform .3s ease-out;
     transform: translateY(-50px);
@@ -25,9 +74,14 @@
     margin: var(--bs-modal-margin);
     pointer-events: none;
 }
-.app-logo{
-    width: 300px;
-    height: 100px;
+
+.app-logo {
+    display: block;
+    max-width: min(300px, 90vw);
+    max-height: 100px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
 
 
@@ -157,17 +211,6 @@
     border-radius: 8px;
     transition: all .3s ease;
 }
-/* 
-button,
-input,
-optgroup,
-select,
-textarea {
-    margin: 0;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: inherit;
-} */
 
 .login-form .field-outer {
     position: relative;

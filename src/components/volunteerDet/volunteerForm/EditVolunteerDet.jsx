@@ -1,88 +1,61 @@
 import { CancelOutlined } from '@mui/icons-material'
 import { Button, Grid, Modal } from '@mui/material'
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { NotificationManager } from 'react-notifications'
+import { useSelector } from 'react-redux'
 import './editVolunteer.css'
-import { NotificationContainer, NotificationManager } from 'react-notifications';
-import { getApiUrl } from '../../../config';
 
 
-const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, onClose }) => {
+const EditVolunteerDet = ({ fetchVoluntrData, campIdD, userID, data, formMode, isOpen, onClose }) => {
 
-    // const apiUrl = process.env.NODE_BACKEND_API_URL;
+    const apiUrl = process.env.REACT_APP_API_URL;
+ 
 
-    const apiUrl = getApiUrl();
-
-    const [preferredRoleList, setPreferredRoles] = useState([])
-
-    useEffect(() => {
-        fetch(`${apiUrl}/getAllRoles`)
-            .then(response => response.json())
-            .then(data => {
-                setPreferredRoles(data)
-            }).catch(err => {
-
-            })
-    }, [])
-
-    const [campDetls, setCampDetls] = useState([])
-    useEffect(() => {
-        fetch(`${apiUrl}/getAllCampNames`)
-            .then(response => response.json())
-            .then(data => {
-                setCampDetls(data)
-            }).catch(err => {
-
-            })
-    }, [])
-
-    const [fullName, setfullName] = useState(data === null ? '' : data.fullName)
+    const [fullName, setfullName] = useState(data === null ? '' : data.volunteerName)
     const [dateOfBirth, setDateOfBirth] = useState(data === null ? '' : data.dateOfBirth)
-    const [contactNO, setcontactNO] = useState(data === null ? '' : data.contactNO)
-    const [email, setemailID] = useState(data === null ? '' : data.email)
-    const [roleId, setpreferredRole] = useState(data === null ? '' : data.roleId)
-    const [rolename, setrolename] = useState(data === null ? '' : data.roles.name)
+    const [contactNo, setcontactNO] = useState(data === null ? '' : data.users.contactNo)
+    const [email, setemailID] = useState(data === null ? '' : data.users.email)
     const [street, setstreet] = useState(data === null ? '' : data.street)
     const [city, setcity] = useState(data === null ? '' : data.city)
     const [state, setState] = useState(data === null ? '' : data.state)
     const [zipCode, setzipCode] = useState(data === null ? '' : data.zipCode)
     const [skillExpertise, setskillExpertise] = useState(data === null ? '' : data.skillExpertise)
     const [isSlotPicks, setisSlotPicks] = useState(data === null ? '' : data.isSlotPicks)
-    const [campID, setcampID] = useState(data === null ? null : data.campID)
+    // const [campID, setcampID] = useState(data === null ? campIdD : campIdD)
 
-    const [campRecord, setcampRecord] = useState('')
+    const campID = useSelector(state => state.myReducer.campId)
 
+    const [campDetls, setCampDetls] = useState([])
     useEffect(() => {
-        fetch(`${apiUrl}/getOneCamp/${campID}`)
+
+        fetch(`${apiUrl}/getOneCamp/${campIdD}`)
             .then(response => response.json())
             .then(data => {
-                setcampRecord(data)
+                setCampDetls(data.data.campName)
             }).catch(err => {
-
+                setCampDetls('')
             })
     }, [])
-
 
     const addVolunteerDetls = async (e) => {
         e.preventDefault();
         let payload = {
             "fullName": fullName,
             "dateOfBirth": dateOfBirth,
-            "contactNO": contactNO,
+            "contactNo": contactNo,
             "email": email,
             "street": street,
             "city": city,
             "state": state,
             "zipCode": zipCode,
             "skillExpertise": skillExpertise,
-            "roleId": roleId,
-            "isSlotPicks": isSlotPicks,
+             "isSlotPicks": isSlotPicks,
             "created_by": userID,
-            "campID": 1
+            "campId": campIdD
         }
 
         try {
-            const res = await fetch(`${apiUrl}/adduser`, {
+            const res = await fetch(`${apiUrl}/addVolunteer`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -91,15 +64,18 @@ const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, on
             });
             if (res.ok) {
                 const data = await res.json();
+
                 await fetchVoluntrData();
                 NotificationManager.success(data.message)
                 onClose();
+                setfullName(''); setemailID(''); setcontactNO(''); setDateOfBirth('');
+                 setstreet(''); setcity(''); setState(''); setskillExpertise(''); setisSlotPicks('');
             } else {
                 const data = await res.json();
-                NotificationManager.success(data.message)
+                NotificationManager.error(data.message)
             }
         } catch (error) {
-            NotificationManager.success(error.message)
+            NotificationManager.error(error.message)
         }
     }
 
@@ -109,17 +85,16 @@ const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, on
         let payload = {
             "fullName": fullName,
             "dateOfBirth": dateOfBirth,
-            "contactNO": contactNO,
+            "contactNo": contactNo,
             "email": email,
             "street": street,
             "city": city,
             "state": state,
             "zipCode": zipCode,
             "skillExpertise": skillExpertise,
-            "roleId": roleId,
             "isSlotPicks": isSlotPicks,
             "created_by": userID,
-            "campID": campID
+            "campId": campID
         }
 
         try {
@@ -139,11 +114,11 @@ const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, on
 
                 } else {
                     const data = await res.json();
-                    NotificationManager.success(data.message)
+                    NotificationManager.error(data.message)
                 }
             }
         } catch (error) {
-            NotificationManager.success(error)
+            NotificationManager.error(error)
         }
     }
 
@@ -168,109 +143,92 @@ const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, on
                                                 <div className="form-inner" style={formMode === 'view' ? { display: 'none' } : { display: 'block' }}>
                                                     <h3>{data === null ? 'Add Volunteer Details' : 'Edit Volunteer Details'}</h3>
 
-                                                    <form method="put"
-                                                    //  onSubmit={onUpdatePostDetails}
-                                                    >
+                                                    <form method="put" >
                                                         <div className='jm-post-job-wrapper mb-40'>
                                                             <hr />
                                                             <Grid container spacing={2} className="row">
-                                                                <Grid item xs={7} className="forms-controfl">
+                                                                <Grid item  xs={12} sm={4} md={7} className="forms-controfl">
                                                                     <label>Camp Name</label>
-                                                                    <select className="jm-job-select"
-                                                                        value={campID} onChange={(e) => setcampID(e.target.value)}>
-                                                                        <option>Select Camp</option>
-                                                                        {campDetls === undefined ?
-                                                                            <option>Select Camp</option> :
-                                                                            campDetls.map((item) => (
-                                                                                <option key={item.id} value={item.id}>
-                                                                                    {item.campName}
-                                                                                </option>
-                                                                            ))}
-
-                                                                    </select>
+                                                                    <input type="text"
+                                                                        value={campDetls} disabled
+                                                                    />
 
                                                                 </Grid>
-                                                                <Grid item xs={5} className="forms-controfl">
-                                                                    <label>Volunteer Name</label>
+                                                                <Grid item  xs={12} sm={4} md={5} className="forms-controfl">
+                                                                    <label className='required-field'>Volunteer Name</label>
                                                                     <input type="text" placeholder="Volunteer Name"
                                                                         value={fullName}
                                                                         onChange={(e) => setfullName(e.target.value)} required
                                                                     />
 
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item  xs={12} sm={4} md={4} className="forms-controfl">
                                                                     <label>Date of Birth</label>
                                                                     <input type="date"
                                                                         value={dateOfBirth}
                                                                         onChange={(e) => setDateOfBirth(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
-                                                                    <label>Contact NO</label>
-                                                                    <input type="number"
-                                                                        value={contactNO} placeholder="Contact No" required
-                                                                        onChange={(e) => setcontactNO(e.target.value)}
-                                                                    />
+                                                                <Grid item  xs={12} sm={4} md={4} className="forms-controfl">
+                                                                    <label className='required-field'>Contact NO</label>
+                                                                    {data === null ?
+                                                                        <input type="number"
+                                                                            value={contactNo} placeholder="Contact No" required
+                                                                            onChange={(e) => setcontactNO(e.target.value)}
+                                                                        /> : <input type="number"
+                                                                            value={contactNo} placeholder="Contact No" disabled
+                                                                        />}
                                                                 </Grid>
 
-                                                                <Grid item xs={4} className=" forms-controfl">
-                                                                    <label>Email ID</label>
-                                                                    <input type="text" placeholder="Email ID"
-                                                                        value={email}
-                                                                        onChange={(e) => setemailID(e.target.value)} required
-                                                                    />
+                                                                <Grid item  xs={12} sm={4} md={4} className=" forms-controfl">
+                                                                    <label className='required-field'>Email ID</label>
+                                                                    {data === null ?
+                                                                        <input type="text" placeholder="Email ID"
+                                                                            value={email}
+                                                                            onChange={(e) => setemailID(e.target.value)} required
+                                                                        /> :
+                                                                        <input type="text" placeholder="Email ID"
+                                                                            value={email} disabled
+                                                                        />
+                                                                    }
                                                                 </Grid>
-                                                                <Grid item xs={8} className=" forms-controfl">
+                                                                <Grid item  xs={12} sm={4} md={4} className=" forms-controfl">
                                                                     <label>Street</label>
                                                                     <input type="text" placeholder="Street"
                                                                         value={street}
                                                                         onChange={(e) => setstreet(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
+                                                                <Grid item  xs={12} sm={4} md={3} className=" forms-controfl">
                                                                     <label>City</label>
                                                                     <input type="text" placeholder="City"
                                                                         value={city}
                                                                         onChange={(e) => setcity(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
+                                                                <Grid item  xs={12} sm={4} md={3} className=" forms-controfl">
                                                                     <label>State</label>
                                                                     <input type="text" placeholder="State"
                                                                         value={state}
                                                                         onChange={(e) => setState(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
+                                                                <Grid item  xs={12} sm={4} md={2} className=" forms-controfl">
                                                                     <label>Zip Code</label>
                                                                     <input type="number" placeholder="Zip Code"
                                                                         value={zipCode}
                                                                         onChange={(e) => setzipCode(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
+                                                                <Grid item  xs={12} sm={4} md={4} className=" forms-controfl">
                                                                     <label>Skill Expertise</label>
                                                                     <input type="text" placeholder="Skill Expertise"
                                                                         value={skillExpertise}
                                                                         onChange={(e) => setskillExpertise(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
-                                                                    <label>Preferred Role </label>
-                                                                    <select className="jm-job-select"
-                                                                        value={roleId} onChange={(e) => setpreferredRole(e.target.value)}>
-                                                                        <option>Select Role</option>
-                                                                        {preferredRoleList === undefined ?
-                                                                            <option>Select Role</option> :
-                                                                            preferredRoleList.map((item) => (
-                                                                                <option key={item.id} value={item.id}>
-                                                                                    {item.name}
-                                                                                </option>
-                                                                            ))}
-
-                                                                    </select>
-                                                                </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                
+                                                                <Grid item  xs={12} sm={4} md={4} className="forms-controfl">
                                                                     <label>Opt-in for events created and Pick Slots</label>
                                                                     <input type="text" placeholder="Slot Picks"
                                                                         value={isSlotPicks}
@@ -278,9 +236,9 @@ const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, on
                                                                     />
                                                                 </Grid>
                                                             </Grid>
-                                                            <Grid item xs={12}>
+                                                            <Grid item  xs={12} sm={4} md={12}>
                                                                 <hr />
-                                                                <div style={{ textAlign: 'right', marginTop:'10px' }}>
+                                                                <div style={{ textAlign: 'right', marginTop: '10px' }}>
                                                                     {data === null ?
                                                                         <Button style={{ height: '25px' }}
                                                                             onClick={addVolunteerDetls}
@@ -306,76 +264,71 @@ const EditVolunteerDet = ({ fetchVoluntrData, userID, data, formMode, isOpen, on
                                                     <div className='jm-post-job-wrapper mb-40'>
                                                         <hr />
                                                         <Grid container spacing={2} className="row">
-                                                            <Grid item xs={6} className="forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={7} className="forms-controfl">
                                                                 <label>Camp Name</label>
                                                                 <input type="text"
-                                                                    value={campRecord.campName} disabled
+                                                                    value={campDetls} disabled
                                                                 />
 
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={5} className="forms-controfl">
                                                                 <label>Volunteer Name</label>
                                                                 <input type="text"
                                                                     value={fullName} disabled
                                                                 />
 
                                                             </Grid>
-                                                            <Grid item xs={2} className="forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Date of Birth</label>
                                                                 <input type="date"
                                                                     value={dateOfBirth} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Contact NO</label>
                                                                 <input type="text"
-                                                                    value={contactNO} disabled
+                                                                    value={contactNo} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={4} className="forms-controfl">
                                                                 <label>Email ID</label>
                                                                 <input type="text"
                                                                     value={email} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={8} className=" forms-controfl">
                                                                 <label>Street</label>
                                                                 <input type="text"
                                                                     value={street} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={4} className=" forms-controfl">
                                                                 <label>City</label>
                                                                 <input type="text"
                                                                     value={city} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={4} className=" forms-controfl">
                                                                 <label>State</label>
                                                                 <input type="text"
                                                                     value={state} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={4} className=" forms-controfl">
                                                                 <label>Zip Code</label>
                                                                 <input type="text"
                                                                     value={zipCode} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
+                                                            <Grid item  xs={12} sm={4} md={4} className=" forms-controfl">
                                                                 <label>Skill Expertise</label>
                                                                 <input type="text"
                                                                     value={skillExpertise} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
-                                                                <label>Preferred Role </label>
-                                                                <input type="text"
-                                                                    value={rolename} disabled
-                                                                />
-                                                            </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
-                                                                <label>isSlotPicks</label>
+                                                            
+                                                            <Grid item  xs={12} sm={4} md={4} className="forms-controfl">
+                                                                <label>Opt-in for events created and Pick Slots</label>
                                                                 <input type="text"
                                                                     value={isSlotPicks} disabled
                                                                 />

@@ -4,6 +4,10 @@
     position: fixed;
     left: 250px;
     transition: .3s ease;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #hide~.container-main {
@@ -14,7 +18,7 @@
 
 .content nav {
     height: 56px;
-    background: var(--light);
+    background: var(--topheaderColor);
     padding: 24px;
     display: flex;
     align-items: center;
@@ -23,6 +27,7 @@
     top: 0;
     left: 0;
     z-index: 1000;
+    border-bottom: 1px solid #2596be;
 }
 
 .content nav::before {
@@ -35,7 +40,7 @@
     margin: 0;
     left: 0;
     border-radius: 50%;
-    box-shadow: -20px -20px 0 var(--light);
+    /* box-shadow: -20px -20px 0 var(--topheaderColor); */
 }
 
 
@@ -45,6 +50,7 @@
 
 .content nav .bx.bx-menu {
     cursor: pointer;
+    color: #fff;
 }
 
 .content nav .nav-link {
@@ -52,12 +58,13 @@
     font-weight: 700;
     text-align: center;
     width: 100%;
-
+    color: #fff;
 }
 
+/* 
 .content nav .nav-link:hover {
     color: var(--blue);
-}
+} */
 
 .form-input {
     display: flex;
@@ -126,13 +133,22 @@
 }
 
 .header-name {
-    width: 80%;
+    grid-gap: 5px;
+    line-height: 1.5;
+    text-align: left;
+    width: 100%;
+    color: #fff;
+}
+
+
+.header-name h5 {
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .header-name p {
-    font-weight: 600;
-    text-align: right;
-    font-size: 12px;
+    font-weight: 400;
+    font-size: 9px;
 }
 
 .content .profile img {

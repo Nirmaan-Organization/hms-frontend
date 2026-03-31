@@ -1,0 +1,392 @@
+.editjob-editjobmodal {
+    max-width: 900px;
+    box-shadow: 0 6px 15px rgba(64, 79, 104, .05);
+    border-radius: 8px;
+    margin: 50px auto;
+
+}
+
+.editjobmodal-dialog-centered {
+    display: flex;
+    align-items: center;
+}
+
+
+.editjobmodal-dialog {
+    position: relative;
+    width: auto;
+    pointer-events: none;
+}
+
+
+
+.editjobmodal-dialog-scrollable .editjobmodal-content {
+    max-height: 50%;
+    overflow: hidden;
+}
+
+.editjobmodal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    /* margin-top: 30px; */
+    pointer-events: auto;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, .175);
+    border-radius: 0.5rem;
+    outline: 0;
+}
+
+.jm-post-job-wrapper input[type=text],
+input[type=number],
+input[type=date],
+input[type=time],
+.jm-job-select {
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    margin-bottom: 15px;
+    border: 1px solid #998c8c;
+    border-radius: 5px;
+    padding: 0 20px;
+    font-size: 11px;
+}
+
+.jm-post-job-wrapper .row {
+    max-height: 350px;
+    margin-top: 5px;
+    overflow-y: scroll;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.jm-post-job-wrapper .row::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.jm-post-job-wrapper .row {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.closed-editjobmodal:before {
+    font-family: 'Flaticon';
+    position: relative;
+    font-size: 12px;
+    color: #000;
+    font-weight: 700;
+}
+
+.closed-editjobmodal,
+.closed-editjobmodal:before {
+    width: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .3s;
+}
+
+.closed-editjobmodal:hover {
+    cursor: pointer;
+}
+
+.closed-editjobmodal {
+    position: absolute;
+    height: 40px;
+    right: 10px;
+    top: 10px;
+
+    border-radius: 8px;
+    color: #000000;
+    text-indent: 0;
+    font-size: 0;
+    z-index: 5;
+}
+
+.editjob-editjobmodal .editjobmodal-body {
+    padding: 0;
+}
+
+.editjobmodal-body {
+    position: relative;
+    flex: 1 1 auto;
+}
+
+#editjob-editjobmodal {
+    padding: 30px 40px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.forms-controfl {
+    /* display: flex; */
+    align-items: center;
+    align-content: center;
+}
+
+.forms-controfl label {
+    min-width: fit-content;
+    text-align: right;
+    padding-right: 10px;
+    padding-bottom: 13px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.default-form {
+    position: relative;
+}
+
+#editjob-editjobmodal .editjob-form .h3,
+#editjob-editjobmodal .editjob-form h3 {
+    text-align: center;
+}
+
+.editjob-form .h3,
+.editjob-form h3 {
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 33px;
+    color: #202124;
+    margin-bottom: 32px;
+}
+
+.form-df {
+    display: flex;
+}
+
+.default-form .form-group1 {
+    position: relative;
+    margin-bottom: 20px;
+    margin-right: 5px;
+}
+
+.default-form .form-group1>label {
+    font-size: 15px;
+    line-height: 20px;
+    color: #202124;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+label {
+    display: inline-block;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.editjob-form .field-outer {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    margin-bottom: 32px;
+}
+
+.checkboxes {
+    list-style: none;
+    padding: 0;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+}
+
+.input-group:not(.has-validation)>:not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.form-floating) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.checkboxes input[type=checkbox],
+.checkboxes input[type=radio] {
+    display: none;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+.input-group>:not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.editjob-form .field-outer label {
+    margin-bottom: 0;
+}
+
+.checkboxes label {
+    display: inline-block;
+    cursor: pointer;
+    position: relative;
+    padding-left: 28px;
+    font-size: 15px;
+    line-height: 20px;
+    color: dimgray;
+}
+
+.checkboxes.square label:before {
+    border-radius: 2px;
+}
+
+.checkboxes label:before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    background-color: #fff;
+    border: 1px solid #ecedf2;
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: all .25s;
+    font-family: 'Font Awesome\ 5 Free';
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 17px;
+}
+
+.checkboxes label span {
+    color: #909090;
+}
+
+.editjob-form .field-outer .pwd {
+    position: relative;
+    display: block;
+    font-size: 14px;
+    line-height: 19px;
+    color: #202124;
+    white-space: nowrap;
+}
+
+.btn-align {
+    text-align: center;
+}
+
+.editjob-form .form-group .theme-btn {
+    border: none;
+    font-size: 14px;
+    font-weight: 400;
+
+}
+
+.editjob-form .form-group .theme-btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+
+/* .btn-style-one {
+    position: relative;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff;
+    background-color: #1967d2;
+    font-size: 15px;
+    line-height: 20px;
+    border-radius: 8px;
+    font-weight: 400;
+    padding: 18px 35px 15px;
+} */
+
+.editjob-form .text {
+    position: relative;
+    font-size: 14px;
+    line-height: 19px;
+    color: dimgray;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.text,
+p {
+    font-weight: 400;
+    margin: 0;
+}
+
+.editjob-form .text a {
+    color: dimgray;
+    font-weight: 500;
+}
+
+.default-form .form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.register-dual ul li.react-tabs__tab--selected .btn-style-four {
+    background: #34a853;
+    color: #fff;
+
+}
+
+.btn-style-four {
+    position: relative;
+    text-align: center;
+    white-space: nowrap;
+    color: #1967d2;
+    background-color: #e2eaf8;
+    font-size: 16px;
+    line-height: 20px;
+    border-radius: 8px;
+    font-weight: 400;
+    padding: 10px 25px;
+}
+
+.btn-style-four:hover {
+    color: #e2eaf8;
+    background-color: #1967d2;
+}
+
+
+@media (min-width: 576px) {
+
+
+    .editjobmodal-dialog {
+        margin-right: auto;
+        margin-left: auto;
+    }
+}
+
+@media (min-width: 992px) {
+
+
+
+    .col-lg-6 {
+        flex: 0;
+        width: 70%;
+    }
+}

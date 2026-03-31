@@ -1,15 +1,16 @@
 import { CancelOutlined } from '@mui/icons-material'
 import { Button, Grid, Modal } from '@mui/material'
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { NotificationContainer, NotificationManager } from 'react-notifications'
 import './editCamp.css'
-import { NotificationContainer, NotificationManager } from 'react-notifications';
-import { getApiUrl } from '../../../config';
 
 
-const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => {
+const EditCampDet = ({ fetchData, userData, data, formMode, isOpen, onClose }) => {
 
-    const apiUrl = getApiUrl();
+    // const apiUrl = process.env.NODE_BACKEND_API_URL;
+    const apiUrl = process.env.REACT_APP_API_URL;
+
+    const userID = userData ? userData.id : null;
 
     const [activityTypes, setActivtyDetails] = useState([])
 
@@ -27,22 +28,17 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
     const [campDate, setCampDate] = useState(data === null ? '' : data.campDate)
     const [startTime, setstartTime] = useState(data === null ? '' : data.startTime)
     const [endTime, setendTime] = useState(data === null ? '' : data.endTime)
-    const [location, setlocation] = useState(data === null ? '' : data.location)
+    const [street, setstreet] = useState(data === null ? '' : data.street)
+    const [city, setcity] = useState(data === null ? '' : data.city)
+    const [state, setState] = useState(data === null ? '' : data.state)
+    const [zipCode, setzipCode] = useState(data === null ? '' : data.zipCode)
     const [description, setdescription] = useState(data === null ? '' : data.description)
     const [timeSlotAllocation, settimeSlotAllocation] = useState(data === null ? '' : data.timeSlotAllocation)
 
 
     const [activityType, setactivityType] = useState(data === null ? '' : data.activityType)
-    // const handledSelectedTypes = (e) =>{
-    //     const options = e.target.options;
-    //     const selectedValue = []
-    //     for(let i=0;i<options.lenght;i++){
-    //         if(options[i].selected){
-    //             selectedValue.push(options[i].value)
-    //         }
-    //     }
-    //     setactivityType(selectedValue)
-    // }
+    const [otherActivityType, setOtheractivityType] = useState(data === null ? '' : data.otherActivityType)
+
     const createCampDet = async (e) => {
         e.preventDefault();
         let payload = {
@@ -50,12 +46,16 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
             "campDate": campDate,
             "startTime": startTime,
             "endTime": endTime,
-            "location": location,
+            "street": street,
+            "city": city,
+            "state": state,
+            "zipCode": zipCode,
             "description": description,
             "activityType": activityType,
+            "otherActivityType": otherActivityType,
             "timeSlotAllocation": timeSlotAllocation,
             "created_by": userID,
-            "organizerID": 1
+            "userId": userID
         }
 
         try {
@@ -73,10 +73,10 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
                 onClose();
             } else {
                 const data = await res.json();
-                NotificationManager.success(data.message)
+                NotificationManager.error(data.message)
             }
         } catch (error) {
-            NotificationManager.success(error)
+            NotificationManager.error(error)
         }
     }
 
@@ -88,14 +88,17 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
             "campDate": campDate,
             "startTime": startTime,
             "endTime": endTime,
-            "location": location,
+            "street": street,
+            "city": city,
+            "state": state,
+            "zipCode": zipCode,
             "description": description,
             "activityType": activityType,
+            "otherActivityType": otherActivityType,
             "timeSlotAllocation": timeSlotAllocation,
             "created_by": userID,
-            "organizerID": 1
+            "userId": userID
         }
-
         try {
             if (formMode === 'edit') {
                 const res = await fetch(`${apiUrl}/updateCamp/${data.id}`, {
@@ -110,22 +113,18 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
                     await fetchData();
                     NotificationManager.success(data.message)
                     onClose();
-
                 } else {
                     const data = await res.json();
-                    NotificationManager.success(data.message)
+                    NotificationManager.error(data.message)
                 }
             }
         } catch (error) {
-            NotificationManager.success(error)
+            NotificationManager.error(error.message)
         }
     }
 
 
-
-
-
-    return (
+        return (
         <div>
             <Modal
                 open={isOpen}
@@ -142,73 +141,103 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
                                                 <div className="form-inner" style={formMode === 'view' ? { display: 'none' } : { display: 'block' }}>
                                                     <h3>{data === null ? 'Add Camp Details' : 'Edit Camp Details'}</h3>
 
-                                                    <form method="put"
-                                                    //  onSubmit={onUpdatePostDetails}
-                                                    >
+                                                    <form method="put" >
                                                         <div className='jm-post-job-wrapper mb-40'>
                                                             <hr />
                                                             <Grid container spacing={2} className="row">
-                                                                <Grid item xs={6} className="forms-controfl">
-                                                                    <label>Camp Name</label>
+                                                                <Grid item xs={12} sm={6} className="forms-controfl">
+                                                                    <label className='required-field'>Camp Name</label>
                                                                     <input type="text" placeholder="Camp Name"
                                                                         value={campName}
                                                                         onChange={(e) => setCampName(e.target.value)} required
                                                                     />
-
                                                                 </Grid>
-                                                                <Grid item xs={2} className="forms-controfl">
-                                                                    <label>Camp date</label>
+                                                                <Grid item xs={12} sm={4} md={2} className="forms-controfl">
+                                                                    <label className='required-field'>Camp date</label>
                                                                     <input type="date" placeholder="Camp date"
                                                                         value={campDate}
                                                                         onChange={(e) => setCampDate(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={2} className="forms-controfl">
-                                                                    <label>Start Time</label>
+                                                                    <Grid item xs={12} sm={4} md={2} className="forms-controfl">
+                                                                    <label className='required-field'>Start Time</label>
                                                                     <input type="time"
                                                                         value={startTime}
                                                                         onChange={(e) => setstartTime(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={2} className="forms-controfl">
-                                                                    <label>End Time</label>
+                                                                <Grid item xs={12} sm={4} md={2} className="forms-controfl">
+                                                                    <label className='required-field'>End Time</label>
                                                                     <input type="time"
                                                                         value={endTime}
                                                                         onChange={(e) => setendTime(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className=" forms-controfl">
-                                                                    <label>Location</label>
-                                                                    <input type="text" placeholder="Location"
-                                                                        value={location}
-                                                                        onChange={(e) => setlocation(e.target.value)} required
+                                                                    <Grid item xs={12} sm={6} md={4} className=" forms-controfl">
+                                                                    <label className='required-field'>Street</label>
+                                                                    <input type="text" placeholder="Street"
+                                                                        value={street}
+                                                                        onChange={(e) => setstreet(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={8} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={3} className=" forms-controfl">
+                                                                    <label className='required-field'>City</label>
+                                                                    <input type="text" placeholder="City"
+                                                                        value={city}
+                                                                        onChange={(e) => setcity(e.target.value)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={6} md={3} className=" forms-controfl">
+                                                                    <label className='required-field'>State</label>
+                                                                    <input type="text" placeholder="State"
+                                                                        value={state}
+                                                                        onChange={(e) => setState(e.target.value)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={6} md={2} className=" forms-controfl">
+                                                                    <label className='required-field'>Zip Code</label>
+                                                                    <input type="number" placeholder="Zip Code"
+                                                                        value={zipCode}
+                                                                        onChange={(e) => setzipCode(e.target.value)}
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12} className="forms-controfl">
                                                                     <label>Description</label>
                                                                     <input type="text" placeholder="Description"
                                                                         value={description}
                                                                         onChange={(e) => setdescription(e.target.value)}
                                                                     />
                                                                 </Grid>
-                                                                <Grid item xs={4} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} md={3} className="forms-controfl">
                                                                     <label>Activity Type </label>
-                                                                    <select className="jm-job-select"
-                                                                        value={activityType} onChange={(e) => setactivityType(e.target.value)}>
-                                                                        <option>Select Type</option>
-                                                                        {activityTypes === undefined ?
-                                                                            <option>Select Type</option> :
-                                                                            activityTypes.map((item) => (
-                                                                                <option key={item.id} value={item.activityName}>
-                                                                                    {item.activityName}
-                                                                                </option>
-                                                                            ))}
-
-                                                                    </select>
+                                                                    {activityType === 'Other' ? (
+                                                                        <input type="text" placeholder="Activity Type"
+                                                                            value={otherActivityType}
+                                                                            onChange={(e) => setOtheractivityType(e.target.value)}
+                                                                        />
+                                                                    ) :
+                                                                        (<select className="jm-job-select"
+                                                                            value={activityType} onChange={(e) => setactivityType(e.target.value)}>
+                                                                            <option>Select Type</option>
+                                                                            {activityTypes === undefined ?
+                                                                                <option>Select Type</option> :
+                                                                                activityTypes.map((item) => (
+                                                                                    <option key={item.id} value={item.activityName}>
+                                                                                        {item.activityName}
+                                                                                    </option>
+                                                                                ))}0
+                                                                        </select>
+                                                                        )}
                                                                 </Grid>
-                                                                <Grid item xs={6} className="forms-controfl">
-                                                                    <label>Time Slot Allocation</label>
-                                                                    <input type="text" placeholder="Start Time, End Time"
+                                                                <Grid item xs={12} sm={6} md={3} className="forms-controfl">
+                                                                    <label>Organizer Name </label>
+                                                                    <input type="text" placeholder="Organizer Name"
+                                                                        value={userData.organzationName} disabled
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={12} md={6} className="forms-controfl">
+                                                                    <label>Assoication with</label>
+                                                                    <input type="text" placeholder="Assoication with"
                                                                         value={timeSlotAllocation}
                                                                         onChange={(e) => settimeSlotAllocation(e.target.value)}
                                                                     />
@@ -242,52 +271,76 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
                                                     <div className='jm-post-job-wrapper mb-40'>
                                                         <hr />
                                                         <Grid container spacing={2} className="row">
-                                                            <Grid item xs={6} className="forms-controfl">
+                                                                <Grid item xs={12} sm={6} className="forms-controfl">
                                                                 <label>Camp Name</label>
-                                                                <input type="text" placeholder="Camp Name"
+                                                                <input type="text"
                                                                     value={campName} disabled
                                                                 />
 
                                                             </Grid>
-                                                            <Grid item xs={2} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={2} className="forms-controfl">
                                                                 <label>Camp date</label>
-                                                                <input type="date" placeholder="Camp date"
+                                                                <input type="date"
                                                                     value={campDate} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={2} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={2} className="forms-controfl">
                                                                 <label>Start Time</label>
                                                                 <input type="time"
                                                                     value={startTime} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={2} className="forms-controfl">
+                                                            <Grid item xs={12} sm={4} md={2} className="forms-controfl">
                                                                 <label>End Time</label>
                                                                 <input type="time"
                                                                     value={endTime} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className=" forms-controfl">
-                                                                <label>Location</label>
-                                                                <input type="text" placeholder="Location"
-                                                                    value={location} disabled
+                                                            <Grid item xs={12} sm={6} md={4} className=" forms-controfl">
+                                                                <label>Street</label>
+                                                                <input type="text"
+                                                                    value={street} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={8} className="forms-controfl">
+                                                            <Grid item xs={12} sm={6} md={3} className=" forms-controfl">
+                                                                <label>City</label>
+                                                                <input type="text"
+                                                                    value={city} disabled
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} md={3} className=" forms-controfl">
+                                                                <label>State</label>
+                                                                <input type="text"
+                                                                    value={state} disabled
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={6} md={2} className=" forms-controfl">
+                                                                <label>Zip Code</label>
+                                                                <input type="number"
+                                                                    value={zipCode} disabled
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} className="forms-controfl">
                                                                 <label>Description</label>
-                                                                <input type="text" placeholder="Description"
+                                                                <input type="text"
                                                                     value={description} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
+                                                            <Grid item xs={12} sm={6} md={3} className="forms-controfl">
                                                                 <label>Activity Type </label>
-                                                                <input type="text" placeholder="Location"
+                                                                <input type="text"
                                                                     value={activityType} disabled
                                                                 />
                                                             </Grid>
-                                                            <Grid item xs={4} className="forms-controfl">
-                                                                <label>Time Slot Allocation</label>
-                                                                <input type="text" placeholder="Start Time, End Time"
+                                                            <Grid item xs={12} sm={6} md={3} className="forms-controfl">
+                                                                <label>Organizer Name </label>
+                                                                <input type="text"
+                                                                    value={userData.organzationName} disabled
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={12} sm={12} md={6} className="forms-controfl">
+                                                                <label>Assoication with</label>
+                                                                <input type="text"
                                                                     value={timeSlotAllocation} disabled
                                                                 />
                                                             </Grid>
@@ -301,7 +354,9 @@ const EditCampDet = ({ fetchData, userID, data, formMode, isOpen, onClose }) => 
                                 </div>
                             </div>
                         </div>
+                        <NotificationContainer />
                     </div>
+
                 </>
             </Modal >
         </div >

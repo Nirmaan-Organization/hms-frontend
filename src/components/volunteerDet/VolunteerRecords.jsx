@@ -1,38 +1,38 @@
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
+import { ModeEditOutlineOutlined, VisibilityOutlined } from '@mui/icons-material';
+import { Button, IconButton, TablePagination, Tooltip } from '@mui/material';
+import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { DeleteOutlineOutlined, ModeEditOutlineOutlined, ViewInArOutlined, VisibilityOutlined } from '@mui/icons-material';
-import { IconButton, TextField, TablePagination, Tooltip, Button } from '@mui/material';
-import { useState, useEffect } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 // import EditCampDet from './campForm/EditCampDet';
-import { AddCircleOutlineOutlined, Search, SearchOutlined } from '@mui/icons-material';
-import './volunteerDet.css'
-import { NotificationContainer, NotificationManager } from 'react-notifications';
+import { AddCircleOutlineOutlined } from '@mui/icons-material';
+import { NotificationContainer } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
-import SwapVertOutlinedIcon from '@mui/icons-material/SwapVertOutlined';
-import EditVolunteerDet from './volunteerForm/EditVolunteerDet';
 import { useSelector } from 'react-redux';
-import { getApiUrl } from '../../config';
+import AddVolunteerOption from './AddVolunteerOption';
+import './volunteerDet.css';
+import EditVolunteerDet from './volunteerForm/EditVolunteerDet';
 
 function VolunteerRecords() {
 
-    // const apiUrl = process.env.REACT_APP_API_URL;
 
-    const apiUrl = getApiUrl();
+
+    const apiUrl = process.env.REACT_APP_API_URL;
     const currentUser = localStorage.getItem('userData')
     const userProfile = JSON.parse(currentUser)
     const userId = userProfile ? userProfile.id : null;
+    const userRole = userProfile ? userProfile.role : null;
+
 
     const [preferredRoles, setpreferredRoles] = useState([])
 
     useEffect(() => {
-        fetch(`${apiUrl}/getAllPreRoleDetls`)
+        fetch(`${apiUrl}/getAllRoles`)
             .then(response => response.json())
             .then(data => {
                 setpreferredRoles(data)
@@ -56,13 +56,12 @@ function VolunteerRecords() {
             if (result.status === 'FAILED') {
 
             } else {
-                setallVolunteer(result.data.users)
+                setallVolunteer(result.data.volunteerDetls)
             }
         } catch (err) {
             console.log('Error fetching data', err);
         }
     }
-    console.log('allVolunteers', allVolunteers);
 
     useEffect(() => {
         fetchVoluntrData();
@@ -72,10 +71,18 @@ function VolunteerRecords() {
     const [searchText, setsearchText] = useState('')
     const [selectType, setselectType] = useState('')
 
-    const volunteerLists = allVolunteers
-    // .filter(item =>
-    //     searchText ? item.users.fullName !== null && item.users.fullName.toLowerCase().includes(searchText.toLowerCase()) : true
-    // )
+    const searchVol = allVolunteers  
+        .filter(item =>
+            searchText ? item.volunteerName !== null && item.volunteerName.toLowerCase().includes(searchText.toLowerCase()) : true
+        )
+
+    const volunteerLists = searchVol.filter(item => {
+        const roleMatches = selectType ? item.users.roles?.name !== null && item.users.roles.name.toLowerCase().includes(selectType.toLowerCase()) : true;
+        const isSuperAdmin = userRole === "ROLE_SUPER_ADMIN";
+        const createdByMatches = userId ? item.created_by === userId : true;
+
+        return roleMatches && (isSuperAdmin || createdByMatches);
+    })
 
     const clearSearch = () => {
         setselectType('')
@@ -83,6 +90,9 @@ function VolunteerRecords() {
     }
 
     const [isEditModalOpen, setEditModalOpen] = useState(false)
+    const [isOptionOpen, setisOptionOpen] = useState(false)
+    const [isOptionMode, setisOptionMode] = useState('')
+
     const [selectedData, setSelectedData] = useState(null)
     const [formMode, setformMode] = useState('')
 
@@ -94,6 +104,11 @@ function VolunteerRecords() {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
+
+    const addOptionOpen = (row) => {
+        setisOptionOpen(true);
+        setisOptionMode('Volunteer')
+    }
 
     const addRecord = (row, add) => {
         setSelectedData(null);
@@ -114,31 +129,6 @@ function VolunteerRecords() {
     }
 
 
-    const deleteVolunteer = async (row) => {
-        let payload = {
-            "created_by": userId
-        }
-
-        try {
-            const res = await fetch(`${apiUrl}/deleteVolunteer/${row.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-
-            } else {
-                const data = await res.json();
-                NotificationManager.success(data.message)
-            }
-        } catch (error) {
-            NotificationManager.success(error)
-        }
-    }
 
     return (
         <>
@@ -155,10 +145,10 @@ function VolunteerRecords() {
                                 value={selectType}>
                                 <option>Select Preferred Role</option>
                                 {preferredRoles === undefined ?
-                                    <option>Select Activity Type</option> :
+                                    <option>Select Preferred Role</option> :
                                     preferredRoles.map((item) => (
-                                        <option key={item.id} value={item.preferredRoleName}>
-                                            {item.preferredRoleName}
+                                        <option key={item.id} value={item.name}>
+                                            {item.name}
                                         </option>
                                     ))}
 
@@ -170,21 +160,23 @@ function VolunteerRecords() {
                         </div>
 
                         <IconButton className='bx'>
-                            <Tooltip className='bx' title='Add Camp Details'>
-                                <AddCircleOutlineOutlined className='bx' onClick={() => addRecord(null)} />
+                            <Tooltip className='bx' title='Add Volunteer Details'>
+                                <AddCircleOutlineOutlined className='bx'
+                                    // onClick={() => addRecord(null)} 
+                                    onClick={() => addOptionOpen(null)}
+                                />
                             </Tooltip>
                         </IconButton>
 
                     </div>
                     <Paper className='table-volunteer-container'>
-                        <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+                        <TableContainer component={Paper} sx={{ maxHeight: 300 }}>
                             <Table size='small' aria-label="a dense table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={{ display: 'flex', alignItems: 'center' }} >volunteer ID
+                                        <TableCell style={{ display: 'flex', alignItems: 'center' }} >Volunteer ID
                                             {/* <SwapVertOutlinedIcon style={{fontSize:'15px'}}/>  */}
                                         </TableCell>
-                                        <TableCell >Camp ID</TableCell>
                                         <TableCell >Volunteer Name</TableCell>
                                         <TableCell align="left">Date Of Birth</TableCell>
                                         <TableCell align="left">Contact No</TableCell>
@@ -203,24 +195,22 @@ function VolunteerRecords() {
                                             return (
                                                 <TableRow key={row.id}>
                                                     <TableCell component="td" scope="row">
-                                                        {row.userID}
+                                                        {row.volunteerID}
                                                     </TableCell>
+
                                                     <TableCell component="td" scope="row">
-                                                        { row.campID}
-                                                    </TableCell>
-                                                    <TableCell component="td" scope="row">
-                                                        {row.fullName}
+                                                        {row.volunteerName}
                                                     </TableCell>
                                                     <TableCell align="left">{row.dateOfBirth}</TableCell>
-                                                    <TableCell align="left">{row.contactNO}</TableCell>
-                                                    <TableCell align="left">{row.email}</TableCell>
+                                                    <TableCell align="left">{row.contactNo}</TableCell>
+                                                    <TableCell align="left">{row.users.email}</TableCell>
                                                     <TableCell align="left">
                                                         {row.street}, {row.city}
                                                         <br /> {row.state} - {row.zipCode}
                                                     </TableCell>
                                                     <TableCell align="left">{row.skillExpertise}</TableCell>
 
-                                                    <TableCell align="left">{row.roles.name}</TableCell>
+                                                    <TableCell align="left">{row.users.roles.name}</TableCell>
 
                                                     <TableCell align="center" className='action-items'>
                                                         <IconButton className='icon-action'>
@@ -231,11 +221,6 @@ function VolunteerRecords() {
                                                         <IconButton className='icon-action'>
                                                             <Tooltip title='View'>
                                                                 <VisibilityOutlined onClick={() => viewVolunteerDet(row)} className='icon-action' />
-                                                            </Tooltip>
-                                                        </IconButton>
-                                                        <IconButton className='icon-action'>
-                                                            <Tooltip title='Delete'>
-                                                                <DeleteOutlineOutlined onClick={() => deleteVolunteer(row)} className='icon-action' />
                                                             </Tooltip>
                                                         </IconButton>
                                                     </TableCell>
@@ -258,8 +243,14 @@ function VolunteerRecords() {
                         />
                     </Paper>
                 </div>
+                <AddVolunteerOption fetchRecords={fetchVoluntrData} campIdD={selectCamp}
+                    userID={userId} data={selectedData} formMode={formMode} isOptionMode={isOptionMode} isOptionOpen={isOptionOpen}
+                    onOptionClose={() => setisOptionOpen(false)} />
+
                 {isEditModalOpen && (
-                    <EditVolunteerDet fetchVoluntrData={fetchVoluntrData} userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen} onClose={() => setEditModalOpen(false)} />
+                    <EditVolunteerDet fetchVoluntrData={fetchVoluntrData} campIdD={selectCamp}
+                        userID={userId} data={selectedData} formMode={formMode} isOpen={isEditModalOpen}
+                        onClose={() => setEditModalOpen(false)} />
                 )}
                 <NotificationContainer />
             </section>

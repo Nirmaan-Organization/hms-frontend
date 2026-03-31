@@ -13,9 +13,9 @@ import * as React from 'react';
 import { useState } from 'react';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
+import './register.css';
 import VerifyMail from './VerifyMail';
-import headerLogo from '../../../images/hms-logo.png';
-import { getApiUrl } from '../../../config';
+import headerLogo from '../../../images/hms-logo.png'
 
 
 // TODO remove, this demo shouldn't need to reset the theme.
@@ -25,12 +25,14 @@ const defaultTheme = createTheme();
 
 function RegisterPage() {
 
-    const apiUrl = getApiUrl();
+    // const apiUrl = process.env.NODE_BACKEND_API_URL;
+
+    const apiUrl = process.env.REACT_APP_API_URL;
 
     const [fullname, setFullname] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [role, setRole] = useState('2')
+    const [role, setRole] = useState('14')
     const [userID, setUserID] = useState('')
     const [otpNumber, setOtpNumber] = useState('')
 
@@ -98,7 +100,7 @@ function RegisterPage() {
                 NotificationManager.error(data.message)
             }
         } catch (error) {
-            NotificationManager.error(error?.message || 'Something went wrong. Please try again.')
+            NotificationManager.error(error)
         }
     };
 
@@ -118,7 +120,7 @@ function RegisterPage() {
                     <img src={headerLogo} alt="Logo" className='app-logo' />
 
                     <Typography component="h1" variant="h5">
-                        Sign up
+                        Sign up(Volunteers Only)
                     </Typography>
                     <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
                         <Grid container spacing={2}>
