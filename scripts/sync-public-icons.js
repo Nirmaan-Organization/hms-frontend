@@ -17,30 +17,19 @@ function copyIfMissingOrDifferent(src, dest) {
 }
 
 const root = path.resolve(__dirname, "..");
-const srcImages = path.join(root, "src", "images");
 const publicDir = path.join(root, "public");
 
-// Use the same icon everywhere (tab/favicon + PWA icons).
-copyIfMissingOrDifferent(
-  path.join(srcImages, "hms-icon.png"),
-  path.join(publicDir, "hms-icon.png")
-);
+// Use favicon.png as the single source of truth for all public icons.
+// This keeps old/legacy filenames working (social previews + cached clients).
+const faviconPng = path.join(publicDir, "favicon.png");
 
-// Match the header logo for the browser tab/favicon.
-copyIfMissingOrDifferent(
-  path.join(srcImages, "hms-logo.png"),
-  path.join(publicDir, "hms-logo.png")
-);
-
-// Some browsers / iOS still look for apple-touch-icon.
-copyIfMissingOrDifferent(
-  path.join(srcImages, "hms-icon.png"),
-  path.join(publicDir, "logo192.png")
-);
+copyIfMissingOrDifferent(faviconPng, path.join(publicDir, "hms-icon.png"));
+copyIfMissingOrDifferent(faviconPng, path.join(publicDir, "logo192.png"));
+copyIfMissingOrDifferent(faviconPng, path.join(publicDir, "hms-logo.png"));
 
 // Optional extra icon referenced in index.html; keep it if you want.
 // If you don't have genrl-icon.png in src/images, this will be skipped.
-const genrlSrc = path.join(srcImages, "genrl-icon.png");
+const genrlSrc = path.join(root, "src", "images", "genrl-icon.png");
 if (fs.existsSync(genrlSrc)) {
   copyIfMissingOrDifferent(genrlSrc, path.join(publicDir, "genrl-icon.png"));
 }
