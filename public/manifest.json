@@ -3,19 +3,14 @@
   "name": "HMS",
   "icons": [
     {
-      "src": "hms-icon.png",
+      "src": "favicon.png",
       "type": "image/png",
       "sizes": "512x512"
     },
     {
-      "src": "hms-icon.png",
+      "src": "favicon.png",
       "type": "image/png",
       "sizes": "192x192"
-    },
-    {
-      "src": "hms-icon.png",
-      "type": "image/png",
-      "sizes": "512x512"
     }
   ],
   "start_url": ".",
