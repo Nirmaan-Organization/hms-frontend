@@ -127,7 +127,7 @@ const ForgetPassword = ({ ispassChangeOpen, onpasschangeClose }) => {
                                     <div id="login-modal" style={{ display: forgettab ? "block" : 'none' }} >
                                         <div className="login-form default-form">
                                             <div className="form-inner">
-                                                <h3>Forget Password</h3>
+                                                <h3>Forgot Password</h3>
 
                                                 <form method="post" onSubmit={forgetPasswordSubmit}>
                                                     <div className="form-group1">
