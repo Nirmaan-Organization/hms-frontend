@@ -136,6 +136,79 @@ function buildCountMap(records, keySelector) {
   return map;
 }
 
+function ToggleLegend({ payload = [], hiddenSet, onToggle, maxHeight = 120, layout = 'vertical', columns = 1 }) {
+  const isHorizontal = layout === 'horizontal';
+  const isTwoColumn = !isHorizontal && columns === 2;
+  return (
+    <div
+      style={{
+        maxHeight: isHorizontal || isTwoColumn ? undefined : maxHeight,
+        overflowY: isHorizontal || isTwoColumn ? 'visible' : 'auto',
+        padding: '0 6px',
+        display: isHorizontal ? 'flex' : isTwoColumn ? 'grid' : 'block',
+        gridTemplateColumns: isTwoColumn ? 'minmax(0, 1fr) minmax(0, 1fr)' : undefined,
+        columnGap: isTwoColumn ? 12 : undefined,
+        rowGap: isTwoColumn ? 6 : undefined,
+        flexWrap: isHorizontal ? 'wrap' : undefined,
+        gap: isHorizontal ? 10 : undefined,
+        justifyContent: isHorizontal ? 'center' : undefined,
+        alignContent: isTwoColumn ? 'start' : undefined,
+      }}
+    >
+      {payload.map((entry) => {
+        const name = entry?.value ?? entry?.payload?.name;
+        const color = entry?.color || entry?.payload?.fill || '#999';
+        const hidden = hiddenSet.has(String(name));
+        return (
+          <div
+            key={String(name)}
+            role="button"
+            tabIndex={0}
+            onClick={() => onToggle(String(name))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') onToggle(String(name));
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              cursor: 'pointer',
+              userSelect: 'none',
+              margin: isHorizontal ? '2px 0' : isTwoColumn ? 0 : '4px 0',
+              minWidth: 0,
+              opacity: hidden ? 0.5 : 1,
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 2,
+                background: color,
+                display: 'inline-block',
+                flex: '0 0 10px',
+              }}
+            />
+            <span
+              style={{
+                textDecoration: hidden ? 'line-through' : 'none',
+                fontSize: 12,
+                ...(isTwoColumn
+                  ? { whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', lineHeight: 1.25 }
+                  : {}),
+              }}
+              title={String(name)}
+            >
+              {String(name)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function Statistics() {
   const apiUrl = getApiUrl();
   const [records, setRecords] = useState([]);
@@ -144,6 +217,11 @@ export default function Statistics() {
   const [section2FromDate, setSection2FromDate] = useState('');
   const [section2ToDate, setSection2ToDate] = useState('');
   const [trendMode, setTrendMode] = useState('daily');
+  const [hiddenIllness, setHiddenIllness] = useState(() => new Set());
+  const [hiddenDistrict, setHiddenDistrict] = useState(() => new Set());
+  const [hiddenClass, setHiddenClass] = useState(() => new Set());
+  const [hiddenIllnessBars, setHiddenIllnessBars] = useState(() => new Set());
+  const [hiddenClassBars, setHiddenClassBars] = useState(() => new Set());
 
   useEffect(() => {
     const fetchRecords = async () => {
@@ -197,6 +275,54 @@ export default function Statistics() {
     return Object.entries(map).map(([name, value]) => ({ name, value }));
   }, [section1Records]);
 
+  const displayedIllnessPieData = useMemo(() => {
+    return illnessPieData.map((d) => (hiddenIllness.has(String(d.name)) ? { ...d, value: 0 } : d));
+  }, [illnessPieData, hiddenIllness]);
+
+  const displayedDistrictPieData = useMemo(() => {
+    return districtPieData.map((d) => (hiddenDistrict.has(String(d.name)) ? { ...d, value: 0 } : d));
+  }, [districtPieData, hiddenDistrict]);
+
+  const displayedClassPieData = useMemo(() => {
+    return classPieData.map((d) => (hiddenClass.has(String(d.name)) ? { ...d, value: 0 } : d));
+  }, [classPieData, hiddenClass]);
+
+  const illnessPieLegendPayload = useMemo(
+    () =>
+      illnessPieData.map((entry, index) => ({
+        value: entry.name,
+        color: CHART_COLORS[index % CHART_COLORS.length],
+      })),
+    [illnessPieData]
+  );
+
+  const districtPieLegendPayload = useMemo(
+    () =>
+      districtPieData.map((entry, index) => ({
+        value: entry.name,
+        color: CHART_COLORS[index % CHART_COLORS.length],
+      })),
+    [districtPieData]
+  );
+
+  const classPieLegendPayload = useMemo(
+    () =>
+      classPieData.map((entry, index) => ({
+        value: entry.name,
+        color: CHART_COLORS[index % CHART_COLORS.length],
+      })),
+    [classPieData]
+  );
+
+  const toggleFromSet = (setter) => (key) => {
+    setter((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
   const illnessKeys = useMemo(() => {
     return Array.from(new Set(section2Records.map((r) => normalizeValue(r.illnessType))));
   }, [section2Records]);
@@ -204,6 +330,20 @@ export default function Statistics() {
   const classKeys = useMemo(() => {
     return Array.from(new Set(section2Records.map((r) => normalizeValue(r.studentClass))));
   }, [section2Records]);
+
+  const illnessBarsLegendPayload = useMemo(() => {
+    return illnessKeys.map((key, index) => ({
+      value: key,
+      color: CHART_COLORS[index % CHART_COLORS.length],
+    }));
+  }, [illnessKeys]);
+
+  const classBarsLegendPayload = useMemo(() => {
+    return classKeys.map((key, index) => ({
+      value: key,
+      color: CHART_COLORS[index % CHART_COLORS.length],
+    }));
+  }, [classKeys]);
 
   const districtVsIllnessData = useMemo(() => {
     const districtMap = {};
@@ -381,79 +521,178 @@ export default function Statistics() {
             Total number of cases: {section1Records.length}
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2, borderRadius: 2, height: 330 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, textAlign: 'center' }}>
-                  Illness Type
-                </Typography>
-                <ResponsiveContainer width="100%" height="90%">
-                  <PieChart>
-                    <Pie
-                      data={illnessPieData}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={95}
-                      labelLine={false}
-                      label={renderPieValueLabel}
-                    >
-                      {illnessPieData.map((entry, index) => (
-                        <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2, borderRadius: 2, height: 330 }}>
+            <Grid item xs={12}>
+              <Paper sx={{ p: 2, borderRadius: 2, minHeight: 360 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, textAlign: 'center' }}>
                   District Wise
                 </Typography>
-                <ResponsiveContainer width="100%" height="90%">
-                  <PieChart>
-                    <Pie
-                      data={districtPieData}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={95}
-                      labelLine={false}
-                      label={renderPieValueLabel}
-                    >
-                      {districtPieData.map((entry, index) => (
-                        <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    alignItems: { xs: 'stretch', md: 'stretch' },
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ flex: '1 1 55%', minWidth: 0, height: 300 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={displayedDistrictPieData}
+                          dataKey="value"
+                          nameKey="name"
+                          outerRadius={95}
+                          labelLine={false}
+                        >
+                          {districtPieData.map((entry, index) => (
+                            <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <Box
+                    sx={{
+                      flex: { xs: '1 1 auto', md: '0 0 45%' },
+                      minWidth: { md: 200 },
+                      maxWidth: { md: 480 },
+                      alignSelf: { md: 'stretch' },
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      pl: { md: 1.5 },
+                      borderLeft: { md: '1px solid' },
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <ToggleLegend
+                      payload={districtPieLegendPayload}
+                      hiddenSet={hiddenDistrict}
+                      onToggle={toggleFromSet(setHiddenDistrict)}
+                      layout="vertical"
+                      columns={2}
+                    />
+                  </Box>
+                </Box>
               </Paper>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Paper sx={{ p: 2, borderRadius: 2, height: 330 }}>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 2, borderRadius: 2, minHeight: 340 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, textAlign: 'center' }}>
+                  Illness Type
+                </Typography>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'stretch', sm: 'center' },
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ flex: '1 1 58%', minWidth: 0, height: 280 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={displayedIllnessPieData}
+                          dataKey="value"
+                          nameKey="name"
+                          outerRadius={90}
+                          labelLine={false}
+                          label={renderPieValueLabel}
+                        >
+                          {illnessPieData.map((entry, index) => (
+                            <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <Box
+                    sx={{
+                      flex: { xs: '1 1 auto', sm: '0 0 38%' },
+                      minWidth: { sm: 120 },
+                      minHeight: { xs: 'auto', sm: 280 },
+                      maxHeight: 280,
+                      overflowY: 'auto',
+                      pl: { sm: 1 },
+                      borderLeft: { sm: '1px solid' },
+                      borderColor: 'divider',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: { xs: 'flex-start', sm: 'center' },
+                    }}
+                  >
+                    <ToggleLegend
+                      payload={illnessPieLegendPayload}
+                      hiddenSet={hiddenIllness}
+                      onToggle={toggleFromSet(setHiddenIllness)}
+                      layout="vertical"
+                      maxHeight={10000}
+                    />
+                  </Box>
+                </Box>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Paper sx={{ p: 2, borderRadius: 2, minHeight: 340 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, textAlign: 'center' }}>
                   Class Wise
                 </Typography>
-                <ResponsiveContainer width="100%" height="90%">
-                  <PieChart>
-                    <Pie
-                      data={classPieData}
-                      dataKey="value"
-                      nameKey="name"
-                      outerRadius={95}
-                      labelLine={false}
-                      label={renderPieValueLabel}
-                    >
-                      {classPieData.map((entry, index) => (
-                        <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'stretch', sm: 'center' },
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ flex: '1 1 58%', minWidth: 0, height: 280 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={displayedClassPieData}
+                          dataKey="value"
+                          nameKey="name"
+                          outerRadius={90}
+                          labelLine={false}
+                          label={renderPieValueLabel}
+                        >
+                          {classPieData.map((entry, index) => (
+                            <Cell key={entry.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </Box>
+                  <Box
+                    sx={{
+                      flex: { xs: '1 1 auto', sm: '0 0 38%' },
+                      minWidth: { sm: 120 },
+                      minHeight: { xs: 'auto', sm: 280 },
+                      maxHeight: 280,
+                      overflowY: 'auto',
+                      pl: { sm: 1 },
+                      borderLeft: { sm: '1px solid' },
+                      borderColor: 'divider',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: { xs: 'flex-start', sm: 'center' },
+                    }}
+                  >
+                    <ToggleLegend
+                      payload={classPieLegendPayload}
+                      hiddenSet={hiddenClass}
+                      onToggle={toggleFromSet(setHiddenClass)}
+                      layout="vertical"
+                      maxHeight={10000}
+                    />
+                  </Box>
+                </Box>
               </Paper>
             </Grid>
           </Grid>
@@ -499,38 +738,82 @@ export default function Statistics() {
           </Stack>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Paper sx={{ p: 2, borderRadius: 2, height: 380 }}>
+              <Paper sx={{ p: 2, borderRadius: 2, height: 520 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, textAlign: 'center' }}>
                   District vs Total Cases (Illness Type Stacked)
                 </Typography>
-                <ResponsiveContainer width="100%" height="88%">
-                  <BarChart data={districtVsIllnessData}>
+                <Box sx={{ mb: 1 }}>
+                  <ToggleLegend
+                    payload={illnessBarsLegendPayload}
+                    hiddenSet={hiddenIllnessBars}
+                    onToggle={toggleFromSet(setHiddenIllnessBars)}
+                    layout="horizontal"
+                  />
+                </Box>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={districtVsIllnessData}
+                    margin={{ top: 10, right: 12, left: 8, bottom: 120 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="district" />
+                    <XAxis
+                      dataKey="district"
+                      angle={-90}
+                      textAnchor="end"
+                      height={120}
+                      interval={0}
+                    />
                     <YAxis allowDecimals={false} />
                     <Tooltip />
-                    <Legend />
                     {illnessKeys.map((key, index) => (
-                      <Bar key={key} dataKey={key} stackId="illnessStack" fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      <Bar
+                        key={key}
+                        dataKey={key}
+                        stackId="illnessStack"
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                        hide={hiddenIllnessBars.has(String(key))}
+                      />
                     ))}
                   </BarChart>
                 </ResponsiveContainer>
               </Paper>
             </Grid>
             <Grid item xs={12}>
-              <Paper sx={{ p: 2, borderRadius: 2, height: 380 }}>
+              <Paper sx={{ p: 2, borderRadius: 2, height: 520 }}>
                 <Typography variant="subtitle2" sx={{ mb: 1, textAlign: 'center' }}>
                   District vs Total Cases (Class Wise Stacked)
                 </Typography>
-                <ResponsiveContainer width="100%" height="88%">
-                  <BarChart data={districtVsClassData}>
+                <Box sx={{ mb: 1 }}>
+                  <ToggleLegend
+                    payload={classBarsLegendPayload}
+                    hiddenSet={hiddenClassBars}
+                    onToggle={toggleFromSet(setHiddenClassBars)}
+                    layout="horizontal"
+                  />
+                </Box>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={districtVsClassData}
+                    margin={{ top: 10, right: 12, left: 8, bottom: 120 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="district" />
+                    <XAxis
+                      dataKey="district"
+                      angle={-90}
+                      textAnchor="end"
+                      height={120}
+                      interval={0}
+                    />
                     <YAxis allowDecimals={false} />
                     <Tooltip />
-                    <Legend />
                     {classKeys.map((key, index) => (
-                      <Bar key={key} dataKey={key} stackId="classStack" fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      <Bar
+                        key={key}
+                        dataKey={key}
+                        stackId="classStack"
+                        fill={CHART_COLORS[index % CHART_COLORS.length]}
+                        hide={hiddenClassBars.has(String(key))}
+                      />
                     ))}
                   </BarChart>
                 </ResponsiveContainer>
