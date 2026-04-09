@@ -98,19 +98,8 @@ export function isHccSupervisor() {
   const names = getCurrentUserRoleNames();
   return names.some((n) =>
     n === 'hcc supervisor' ||
-    n === 'hcc supervisore' ||
     n === 'hcc-supervisor' ||
-    n === 'hcc-supervisore' ||
     n === 'hccsupervisor'
-  );
-}
-
-export function isHccAdvisore() {
-  const names = getCurrentUserRoleNames();
-  return names.some((n) =>
-    n === 'hcc advisore' ||
-    n === 'hcc-advisore' ||
-    n === 'hccadvisore'
   );
 }
 
