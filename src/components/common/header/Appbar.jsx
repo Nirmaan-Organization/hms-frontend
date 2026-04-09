@@ -15,7 +15,7 @@ import Sidebar from '../sidebar/Sidebar';
 import AccountMenu from './AccountMenu';
 import './appbar.css';
 import UserDet from '../../userdetails/UserDet';
-import { isHccAdmin, isHccDataEntry, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
+import { isHccAdmin, isHccDataEntry, isHccRole, isHccSupervisor, isSuperAdmin } from '../../../utils/roleUtils';
 import { setactiveStyle, setValue } from '../../redux/reducer';
 
 const Appbar = () => {
@@ -35,13 +35,19 @@ const Appbar = () => {
     const dispatch = useDispatch();
     const value = useSelector(state => state.myReducer.value)
 
-    const canSeeHcc = isSuperAdmin() || isHccRole() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY';
-    const canSeeHccStats = isSuperAdmin() || isHccAdmin() || userRole === 'ROLE_HCC_ADMIN';
+    const canSeeHcc = isSuperAdmin() || isHccRole() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || userRole === 'ROLE_HCC_SUPERVISOR';
+    const canSeeHccStats = isSuperAdmin() || isHccAdmin() || isHccSupervisor() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_SUPERVISOR';
     const canSeeHccRecords = canSeeHcc;
-    const canSeeHccEntry = isSuperAdmin() || isHccAdmin() || isHccDataEntry() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY';
+    const canSeeHccEntry =
+        isSuperAdmin() ||
+        isHccAdmin() ||
+        isHccDataEntry() ||
+        userRole === 'ROLE_HCC_ADMIN' ||
+        userRole === 'ROLE_HCC_DATA_ENTRY';
 
     const isMaster = masterRole.includes(userRole);
-    const isHccUser = userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || isHccRole();
+    const isHccUser = userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || userRole === 'ROLE_HCC_SUPERVISOR' || isHccRole();
+    const isHccSupervisorRole = userRole === 'ROLE_HCC_SUPERVISOR' || isHccSupervisor();
 
     // Default landing page after login:
     // - HCC Admin / HCC Data Entry: HCC Data Entry (id 90)
@@ -50,12 +56,12 @@ const Appbar = () => {
     useEffect(() => {
         if (value !== '') return;
 
-        const defaultId = isHccUser ? 90 : (isMaster ? 1 : 2);
+        const defaultId = isHccUser ? (isHccSupervisorRole ? 91 : 90) : (isMaster ? 1 : 2);
         dispatch(setValue(defaultId));
         dispatch(setactiveStyle(defaultId));
-    }, [dispatch, isHccUser, isMaster, value]);
+    }, [dispatch, isHccSupervisorRole, isHccUser, isMaster, value]);
 
-    const sideMenu = value === '' ? (isHccUser ? 90 : (isMaster ? 1 : 2)) : value;
+    const sideMenu = value === '' ? (isHccUser ? (isHccSupervisorRole ? 91 : 90) : (isMaster ? 1 : 2)) : value;
 
     return (
         <>

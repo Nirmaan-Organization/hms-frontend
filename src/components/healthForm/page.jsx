@@ -47,18 +47,18 @@ export default function HealthFormPage() {
   });
 
   const validateVitalsField = (name, value) => {
+    // Vitals are optional. Only validate when user enters a value.
+    const raw = String(value ?? '').trim();
+    if (raw === '') return '';
     switch (name) {
       case 'temperatureF': {
-        if (!value) return 'Temperature is required.';
-        const temp = parseFloat(value);
+        const temp = parseFloat(raw);
         if (Number.isNaN(temp)) return 'Temperature must be a number.';
         if (temp < 90 || temp > 110) return 'Temperature should be between 90°F and 110°F.';
         return '';
       }
       case 'bloodPressure': {
-        const bpValue = (value || '').trim();
-        if (!bpValue) return 'BP is required.';
-        const bpMatch = bpValue.match(/^(\d{2,3})\/(\d{2,3})$/);
+        const bpMatch = raw.match(/^(\d{2,3})\/(\d{2,3})$/);
         if (!bpMatch) return 'BP must be in the format 120/80.';
         const systolic = parseInt(bpMatch[1], 10);
         const diastolic = parseInt(bpMatch[2], 10);
@@ -68,15 +68,13 @@ export default function HealthFormPage() {
         return '';
       }
       case 'pulseBpm': {
-        if (!value) return 'Pulse is required.';
-        const pulse = parseInt(value, 10);
+        const pulse = parseInt(raw, 10);
         if (Number.isNaN(pulse)) return 'Pulse must be a number.';
         if (pulse < 40 || pulse > 200) return 'Pulse (BPM) should be between 40 and 200.';
         return '';
       }
       case 'oxygenSaturation': {
-        if (!value) return 'Oxygen saturation is required.';
-        const spo2 = parseInt(value, 10);
+        const spo2 = parseInt(raw, 10);
         if (Number.isNaN(spo2)) return 'Oxygen saturation must be a number.';
         if (spo2 < 70 || spo2 > 100) return 'Oxygen Saturation (%) should be between 70 and 100.';
         return '';
@@ -305,21 +303,29 @@ export default function HealthFormPage() {
                 name="studentId"
                 value={formData.studentId}
                 onChange={handleChange}
-                required
                 placeholder="Enter student ID"
               />
             </Grid>
 
             <Grid item xs={12} sm={6}>
               <TextField
+                select
                 fullWidth
                 label="Class"
                 name="studentClass"
                 value={formData.studentClass}
                 onChange={handleChange}
                 required
-                placeholder="Enter class (e.g. 5A)"
-              />
+              >
+                <MenuItem value="">
+                  <em>Select class</em>
+                </MenuItem>
+                {[6, 7, 8, 9, 10, 11, 12].map((c) => (
+                  <MenuItem key={c} value={String(c)}>
+                    {c}
+                  </MenuItem>
+                ))}
+              </TextField>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -411,7 +417,6 @@ export default function HealthFormPage() {
                 inputProps={{ step: '0.1' }}
                 value={formData.temperatureF}
                 onChange={handleChange}
-                required
                 sx={{
                     '& input': {
                       border: 'none',
@@ -431,7 +436,6 @@ export default function HealthFormPage() {
                 placeholder="120/80"
                 value={formData.bloodPressure}
                 onChange={handleChange}
-                required
                 sx={{
                     '& input': {
                       border: 'none',
@@ -451,7 +455,6 @@ export default function HealthFormPage() {
                 type="number"
                 value={formData.pulseBpm}
                 onChange={handleChange}
-                required
                 sx={{
                     '& input': {
                       border: 'none',
@@ -471,7 +474,6 @@ export default function HealthFormPage() {
                 type="number"
                 value={formData.oxygenSaturation}
                 onChange={handleChange}
-                required
                 sx={{
                     '& input': {
                       border: 'none',

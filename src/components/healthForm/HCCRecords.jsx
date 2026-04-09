@@ -19,6 +19,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { getApiUrl } from '../../config';
+import { isHccSupervisor } from '../../utils/roleUtils';
 
 function toCsvValue(value) {
   if (value === null || value === undefined) return '';
@@ -51,6 +52,7 @@ function downloadTextFile({ filename, content, mimeType }) {
 
 const HCCRecords = () => {
   const apiUrl = getApiUrl();
+  const hccSupervisorViewOnly = isHccSupervisor();
 
   const [records, setRecords] = useState([]);
   const [exportingCsv, setExportingCsv] = useState(false);
@@ -144,6 +146,7 @@ const HCCRecords = () => {
   );
 
   const exportFilteredRecordsCsv = async () => {
+    if (hccSupervisorViewOnly) return;
     if (exportingCsv) return;
     setExportingCsv(true);
     try {
@@ -240,6 +243,7 @@ const HCCRecords = () => {
   };
 
   const openFollowUp = async (record) => {
+    if (hccSupervisorViewOnly) return;
     setSelectedRecord(record);
     setFollowOpen(true);
     await fetchVitalsForRecord(record.id);
@@ -284,18 +288,18 @@ const HCCRecords = () => {
   };
 
   const validateVitalsField = (name, value) => {
+    // Vitals are optional. Only validate when user enters a value.
+    const raw = String(value ?? '').trim();
+    if (raw === '') return '';
     switch (name) {
       case 'temperatureF': {
-        if (!value) return 'Temperature is required.';
-        const temp = parseFloat(value);
+        const temp = parseFloat(raw);
         if (Number.isNaN(temp)) return 'Temperature must be a number.';
         if (temp < 90 || temp > 110) return 'Temperature should be between 90°F and 110°F.';
         return '';
       }
       case 'bloodPressure': {
-        const bpValue = (value || '').trim();
-        if (!bpValue) return 'BP is required.';
-        const bpMatch = bpValue.match(/^(\d{2,3})\/(\d{2,3})$/);
+        const bpMatch = raw.match(/^(\d{2,3})\/(\d{2,3})$/);
         if (!bpMatch) return 'BP must be in the format 120/80.';
         const systolic = parseInt(bpMatch[1], 10);
         const diastolic = parseInt(bpMatch[2], 10);
@@ -305,15 +309,13 @@ const HCCRecords = () => {
         return '';
       }
       case 'pulseBpm': {
-        if (!value) return 'Pulse is required.';
-        const pulse = parseInt(value, 10);
+        const pulse = parseInt(raw, 10);
         if (Number.isNaN(pulse)) return 'Pulse must be a number.';
         if (pulse < 40 || pulse > 200) return 'Pulse (BPM) should be between 40 and 200.';
         return '';
       }
       case 'oxygenSaturation': {
-        if (!value) return 'Oxygen saturation is required.';
-        const spo2 = parseInt(value, 10);
+        const spo2 = parseInt(raw, 10);
         if (Number.isNaN(spo2)) return 'Oxygen saturation must be a number.';
         if (spo2 < 70 || spo2 > 100) return 'Oxygen Saturation (%) should be between 70 and 100.';
         return '';
@@ -339,12 +341,13 @@ const HCCRecords = () => {
     }
   };
 
-  const isFollowUpReadyToSubmit =
-    Boolean(selectedRecord) &&
-    ['temperatureF', 'bloodPressure', 'pulseBpm', 'oxygenSaturation'].every((k) => {
-      const v = String(followUpData[k] ?? '').trim();
-      return v !== '' && validateVitalsField(k, v) === '';
-    });
+  const isFollowUpReadyToSubmit = (() => {
+    if (!selectedRecord) return false;
+    const keys = ['temperatureF', 'bloodPressure', 'pulseBpm', 'oxygenSaturation'];
+    const hasAny = keys.some((k) => String(followUpData[k] ?? '').trim() !== '');
+    if (!hasAny) return false;
+    return keys.every((k) => validateVitalsField(k, followUpData[k]) === '');
+  })();
 
   const submitFollowUp = async () => {
     if (!selectedRecord) return;
@@ -478,14 +481,16 @@ const HCCRecords = () => {
         >
           Clear
         </Button>
-        <Button
-          size="small"
-          variant="contained"
-          onClick={exportFilteredRecordsCsv}
-          disabled={filteredRecords.length === 0 || exportingCsv}
-        >
-          {exportingCsv ? 'Exporting…' : 'Export CSV'}
-        </Button>
+        {!hccSupervisorViewOnly && (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={exportFilteredRecordsCsv}
+            disabled={filteredRecords.length === 0 || exportingCsv}
+          >
+            {exportingCsv ? 'Exporting…' : 'Export CSV'}
+          </Button>
+        )}
       </Box>
       <Paper>
         <TableContainer sx={{ maxHeight: 500 }}>
@@ -551,18 +556,20 @@ const HCCRecords = () => {
                       >
                         View Vitals & Reports
                       </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => openFollowUp(row)}
-                        fullWidth
-                        sx={{
-                          minWidth: 190,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        Follow-up
-                      </Button>
+                      {!hccSupervisorViewOnly && (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => openFollowUp(row)}
+                          fullWidth
+                          sx={{
+                            minWidth: 190,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          Follow-up
+                        </Button>
+                      )}
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -758,7 +765,6 @@ const HCCRecords = () => {
                     value={followUpData.temperatureF}
                     onChange={handleFollowUpChange}
                     size="small"
-                    required
                     error={Boolean(followUpErrors.temperatureF)}
                     helperText={followUpErrors.temperatureF}
                     sx={{
@@ -779,7 +785,6 @@ const HCCRecords = () => {
                     onChange={handleFollowUpChange}
                     size="small"
                     placeholder="120/80"
-                    required
                     error={Boolean(followUpErrors.bloodPressure)}
                     helperText={followUpErrors.bloodPressure}
                     sx={{
@@ -800,7 +805,6 @@ const HCCRecords = () => {
                     value={followUpData.pulseBpm}
                     onChange={handleFollowUpChange}
                     size="small"
-                    required
                     error={Boolean(followUpErrors.pulseBpm)}
                     helperText={followUpErrors.pulseBpm}
                     sx={{
@@ -821,7 +825,6 @@ const HCCRecords = () => {
                     value={followUpData.oxygenSaturation}
                     onChange={handleFollowUpChange}
                     size="small"
-                    required
                     error={Boolean(followUpErrors.oxygenSaturation)}
                     helperText={followUpErrors.oxygenSaturation}
                     sx={{
