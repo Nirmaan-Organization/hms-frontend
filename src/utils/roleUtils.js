@@ -94,3 +94,12 @@ export function isHccDataEntry() {
   );
 }
 
+export function isHccSupervisor() {
+  const names = getCurrentUserRoleNames();
+  return names.some((n) =>
+    n === 'hcc supervisor' ||
+    n === 'hcc-supervisor' ||
+    n === 'hccsupervisor'
+  );
+}
+

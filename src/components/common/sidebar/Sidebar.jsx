@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import headerIcon from '../../../images/hms-icon.png';
 import headerLogo from '../../../images/hms-logo.png';
-import { isHccAdmin, isHccDataEntry, isHccRole, isSuperAdmin } from '../../../utils/roleUtils';
+import { isHccAdmin, isHccDataEntry, isHccRole, isHccSupervisor, isSuperAdmin } from '../../../utils/roleUtils';
 import { setValue } from '../../redux/reducer';
 import './sidebar.css';
  
@@ -19,7 +19,8 @@ const Sidebar = ({ hideStyle, userData }) => {
   const isSuper = userRole === 'ROLE_SUPER_ADMIN' || isSuperAdmin();
   const isHccAdminRole = userRole === 'ROLE_HCC_ADMIN' || isHccAdmin();
   const isHccDataEntryRole = userRole === 'ROLE_HCC_DATA_ENTRY' || isHccDataEntry();
-  const isAnyHccRole = isHccAdminRole || isHccDataEntryRole || isHccRole();
+  const isHccSupervisorRole = userRole === 'ROLE_HCC_SUPERVISOR' || isHccSupervisor();
+  const isAnyHccRole = isHccAdminRole || isHccDataEntryRole || isHccSupervisorRole || isHccRole();
 
   const hccMenuItems = [
     { id: 90, menuItem: 'HCC Data Entry', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '#' },
@@ -27,6 +28,10 @@ const Sidebar = ({ hideStyle, userData }) => {
   ];
 
   const hccDashboardItem = { id: 92, menuItem: 'HCC Dashboard', iconImg: <QueryStatsOutlined className='bx' />, menuLink: '#' };
+  const hccSupervisorItems = [
+    { id: 91, menuItem: 'HCC Records', iconImg: <InventoryOutlinedIcon className='bx' />, menuLink: '#' },
+    hccDashboardItem,
+  ];
 
   const baseSidebarIcons = [
     masterRole.includes(userRole) ? { id: 1, menuItem: 'Dashboard', iconImg: <DashboardCustomizeOutlined className='bx' />, menuLink: '#' } : '',
@@ -39,10 +44,15 @@ const Sidebar = ({ hideStyle, userData }) => {
   // Visibility rules requested:
   // - HCC admin: only HCC Data Entry, HCC Records, HCC Dashboard
   // - HCC data entry: only HCC Data Entry, HCC Records
+  // - HCC supervisor: only HCC Records, HCC Dashboard
   // - Super admin: sees everything + all HCC items
   let sidebarIcons = baseSidebarIcons;
   if (!isSuper && isAnyHccRole) {
-    sidebarIcons = isHccAdminRole ? [...hccMenuItems, hccDashboardItem] : [...hccMenuItems];
+    sidebarIcons = isHccAdminRole
+      ? [...hccMenuItems, hccDashboardItem]
+      : isHccSupervisorRole
+        ? [...hccSupervisorItems]
+        : [...hccMenuItems];
   } else if (isSuper) {
     sidebarIcons = [
       ...baseSidebarIcons,

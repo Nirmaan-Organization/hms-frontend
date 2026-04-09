@@ -136,6 +136,10 @@ function buildCountMap(records, keySelector) {
   return map;
 }
 
+function sortByNameAsc(a, b) {
+  return String(a?.name ?? '').localeCompare(String(b?.name ?? ''), undefined, { sensitivity: 'base' });
+}
+
 function ToggleLegend({ payload = [], hiddenSet, onToggle, maxHeight = 120, layout = 'vertical', columns = 1 }) {
   const isHorizontal = layout === 'horizontal';
   const isTwoColumn = !isHorizontal && columns === 2;
@@ -267,7 +271,9 @@ export default function Statistics() {
 
   const districtPieData = useMemo(() => {
     const map = buildCountMap(section1Records, (r) => normalizeValue(r.district));
-    return Object.entries(map).map(([name, value]) => ({ name, value }));
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .sort(sortByNameAsc);
   }, [section1Records]);
 
   const classPieData = useMemo(() => {
@@ -353,7 +359,9 @@ export default function Statistics() {
       if (!districtMap[district]) districtMap[district] = { district };
       districtMap[district][illnessType] = (districtMap[district][illnessType] || 0) + 1;
     }
-    return Object.values(districtMap);
+    return Object.values(districtMap).sort((a, b) =>
+      String(a?.district ?? '').localeCompare(String(b?.district ?? ''), undefined, { sensitivity: 'base' })
+    );
   }, [section2Records]);
 
   const districtVsClassData = useMemo(() => {
@@ -364,7 +372,9 @@ export default function Statistics() {
       if (!districtMap[district]) districtMap[district] = { district };
       districtMap[district][studentClass] = (districtMap[district][studentClass] || 0) + 1;
     }
-    return Object.values(districtMap);
+    return Object.values(districtMap).sort((a, b) =>
+      String(a?.district ?? '').localeCompare(String(b?.district ?? ''), undefined, { sensitivity: 'base' })
+    );
   }, [section2Records]);
 
   const trendData = useMemo(() => {
