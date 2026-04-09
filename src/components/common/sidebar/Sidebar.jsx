@@ -19,7 +19,7 @@ const Sidebar = ({ hideStyle, userData }) => {
   const isSuper = userRole === 'ROLE_SUPER_ADMIN' || isSuperAdmin();
   const isHccAdminRole = userRole === 'ROLE_HCC_ADMIN' || isHccAdmin();
   const isHccDataEntryRole = userRole === 'ROLE_HCC_DATA_ENTRY' || isHccDataEntry();
-  const isHccSupervisorRole = userRole === 'ROLE_HCC_SUPERVISOR' || isHccSupervisor();
+  const isHccSupervisorRole = userRole === 'ROLE_HCC_SUPERVISOR' || userRole === 'ROLE_HCC_SUPERVISORE' || isHccSupervisor();
   const isAnyHccRole = isHccAdminRole || isHccDataEntryRole || isHccSupervisorRole || isHccRole();
 
   const hccMenuItems = [

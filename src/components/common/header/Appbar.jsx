@@ -35,8 +35,8 @@ const Appbar = () => {
     const dispatch = useDispatch();
     const value = useSelector(state => state.myReducer.value)
 
-    const canSeeHcc = isSuperAdmin() || isHccRole() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || userRole === 'ROLE_HCC_SUPERVISOR';
-    const canSeeHccStats = isSuperAdmin() || isHccAdmin() || isHccSupervisor() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_SUPERVISOR';
+    const canSeeHcc = isSuperAdmin() || isHccRole() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || userRole === 'ROLE_HCC_SUPERVISOR' || userRole === 'ROLE_HCC_SUPERVISORE';
+    const canSeeHccStats = isSuperAdmin() || isHccAdmin() || isHccSupervisor() || userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_SUPERVISOR' || userRole === 'ROLE_HCC_SUPERVISORE';
     const canSeeHccRecords = canSeeHcc;
     const canSeeHccEntry =
         isSuperAdmin() ||
@@ -46,8 +46,8 @@ const Appbar = () => {
         userRole === 'ROLE_HCC_DATA_ENTRY';
 
     const isMaster = masterRole.includes(userRole);
-    const isHccUser = userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || userRole === 'ROLE_HCC_SUPERVISOR' || isHccRole();
-    const isHccSupervisorRole = userRole === 'ROLE_HCC_SUPERVISOR' || isHccSupervisor();
+    const isHccUser = userRole === 'ROLE_HCC_ADMIN' || userRole === 'ROLE_HCC_DATA_ENTRY' || userRole === 'ROLE_HCC_SUPERVISOR' || userRole === 'ROLE_HCC_SUPERVISORE' || isHccRole();
+    const isHccSupervisorRole = userRole === 'ROLE_HCC_SUPERVISOR' || userRole === 'ROLE_HCC_SUPERVISORE' || isHccSupervisor();
 
     // Default landing page after login:
     // - HCC Admin / HCC Data Entry: HCC Data Entry (id 90)
