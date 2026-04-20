@@ -199,6 +199,7 @@ export default function HealthFormPage() {
   const districts = [
     'Adilabad',
     'Bhadradri Kothagudem',
+    'Hanumakonda',
     'Hyderabad',
     'Jagtial',
     'Jangaon',
@@ -227,8 +228,7 @@ export default function HealthFormPage() {
     'Suryapet',
     'Vikarabad',
     'Wanaparthy',
-    'Warangal Rural',
-    'Warangal Urban',
+    'Warangal',
     'Yadadri Bhuvanagiri',
   ];
 
